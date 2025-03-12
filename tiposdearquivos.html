@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" type="image/png" sizes="16x16" href="/plugins/images/favicon.png">
+    <title>Ample Admin Template - The Ultimate Multipurpose admin template</title>
+    <!-- Bootstrap Core CSS -->
+    <link href="bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Menu CSS -->
+    <link href="/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.css" rel="stylesheet">
+    <!-- toast CSS -->
+    <link href="/plugins/bower_components/toast-master/css/jquery.toast.css" rel="stylesheet">
+    <!-- morris CSS -->
+    <link href="/plugins/bower_components/morrisjs/morris.css" rel="stylesheet">
+    <!-- chartist CSS -->
+    <link href="/plugins/bower_components/chartist-js/dist/chartist.min.css" rel="stylesheet">
+    <link href="/plugins/bower_components/chartist-plugin-tooltip-master/dist/chartist-plugin-tooltip.css" rel="stylesheet">
+    <!-- Calendar CSS -->
+    <link href="/plugins/bower_components/calendar/dist/fullcalendar.css" rel="stylesheet" />
+    <!-- animation CSS -->
+    <link href="css/animate.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/edit.css" rel="stylesheet">
+    <!-- color CSS -->
+    <link href="css/colors/gray-dark.css" id="theme" rel="stylesheet">
+    <style>
+        /* Estilo para a tela de carregamento */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body class="fix-header">
+    <!-- Tela de carregamento -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- Preloader -->
+    <!-- ============================================================== -->
+    <div class="preloader">
+        <svg class="circular" viewBox="25 25 50 50">
+            <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" />
+        </svg>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- Wrapper -->
+    <!-- ============================================================== -->
+    <div id="wrapper">
+        <!-- ============================================================== -->
+        <!-- Topbar header -->
+        <!-- ============================================================== -->
+        <nav class="navbar navbar-default navbar-static-top m-b-0">
+            <div class="navbar-header">
+                <div class="top-left-part">
+                    <a class="logo" href="index.html">
+                        <span class="hidden-xs">
+                            <img src="/plugins/images/logo.webp" alt="home" class="dark-logo" width="200px">
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ============================================================== -->
+        <!-- Left Sidebar -->
+        <!-- ============================================================== -->
+        <div class="navbar-default sidebar" role="navigation">
+            <div class="sidebar-nav slimscrollsidebar">
+                <div class="sidebar-head">
+                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu">Navigation</span></h3>
+                </div>
+                <ul class="nav" id="side-menu">
+                    <li> <a class="waves-effect active"><i class="mdi mdi-table fa-fw"></i> <span class="hide-menu">Tabelas<span class="fa arrow"></span></span></a>
+                        <ul class="nav nav-second-level">
+                            <li><a href="/cliente"><i class="ti-user fa-fw"></i><span class="hide-menu">Cliente</span></a></li>
+                            <li><a href="/tipoarquivo"><i class="ti-files fa-fw"></i><span class="hide-menu">Tipo Arquivo</span></a></li>
+                            <li><a href="/extensao"><i class="ti-file fa-fw"></i><span class="hide-menu">Extensão</span></a></li>
+                            <li><a href="/regra"><i class="ti-key fa-fw"></i><span class="hide-menu">Regra</span></a></li>
+                            <li><a href="/arquivo"><i class="ti-file fa-fw"></i><span class="hide-menu">Arquivo</span></a></li>
+                        </ul>
+                    </li>   
+                </ul>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- Page Content -->
+        <!-- ============================================================== -->
+        <div id="page-wrapper">
+            <div class="container-fluid">
+                <div class="row bg-title">
+                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                        <h4 class="page-title">TIPOS DE ARQUIVO</h4>
+                    </div>
+                    <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
+                        <ol class="breadcrumb">
+                            <li><a href="#">Tabelas</a></li>
+                            <li class="active">Tipos De Arquivos</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- ============================================================== -->
+                <!-- Cadastro Cliente -->
+                <!-- ============================================================== -->
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="panel">
+                            <div class="panel-heading">
+                                TABELA TIPO DE ARQUIVO
+                                <a href="/cadastrotipodearquivo" class="btn btn-primary btn-sm pull-right" style="margin-top: -5px;">
+                                    Adicionar Tipo De Arquivo
+                                </a>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover manage-u-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Id</th>
+                                            <th>Nome</th>
+                                            <th>Descrição</th>
+                                            <th>Ativo</th>
+                                            <th>Gerenciar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="clientesTable">
+                                        <!-- A tabela será preenchida dinamicamente com os dados dos clientes -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="footer text-center"> 2025 &copy; Todos direitos reservados - Arker </footer>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- All Jquery -->
+    <!-- ============================================================== -->
+    <script src="/plugins/bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.js"></script>
+    <script src="js/jquery.slimscroll.js"></script>
+    <script src="js/waves.js"></script>
+    <script src="/plugins/bower_components/waypoints/lib/jquery.waypoints.js"></script>
+    <script src="/plugins/bower_components/counterup/jquery.counterup.min.js"></script>
+    <script src="/plugins/bower_components/chartist-js/dist/chartist.min.js"></script>
+    <script src="/plugins/bower_components/chartist-plugin-tooltip-master/dist/chartist-plugin-tooltip.min.js"></script>
+    <script src="/plugins/bower_components/moment/moment.js"></script>
+    <script src='/plugins/bower_components/calendar/dist/fullcalendar.min.js'></script>
+    <script src="/plugins/bower_components/calendar/dist/cal-init.js"></script>
+    <script src="js/custom.min.js"></script>
+    <script src="/plugins/bower_components/toast-master/js/jquery.toast.js"></script>
+    <script src="/plugins/bower_components/styleswitcher/jQuery.style.switcher.js"></script>
+        <!-- SweetAlert2 CSS e JS -->
+        <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+    <script>
+        // Função para buscar tipos de arquivo
+        async function buscarTiposDeArquivo() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            loadingScreen.style.display = 'flex'; // Exibe a tela de carregamento
+
+            try {
+                const response = await fetch('/tiposdearquivos');
+                const tiposDeArquivo = await response.json();
+
+                const tableBody = document.getElementById('clientesTable');
+                tableBody.innerHTML = ''; // Limpa a tabela antes de adicionar os novos dados
+
+                tiposDeArquivo.forEach(tipo => {
+                    const ativo = tipo.Ativo === 1 ? 'Sim' : 'Não'; // Verifica se Ativo é 1 ou 0
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><span class="font-medium">${tipo.IdTipoArquivo}</span></td>
+                        <td><span class="font-medium">${tipo.TipoArquivo}</span></td>
+                        <td><span class="font-medium">${tipo.Descricao}</span></td>
+                        <td>${ativo}</td>
+                        <td>
+                            <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="editTipoArquivo('${tipo.IdTipoArquivo}')">
+                            <i class="ti-pencil-alt"></i>
+                            </button>
+                            <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="deactivateTipoArquivo('${tipo.IdTipoArquivo}')">
+                            <i class="icon-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Erro ao buscar tipos de arquivo:', error);
+            } finally {
+                loadingScreen.style.display = 'none'; // Oculta a tela de carregamento
+            }
+        }
+
+        // Função para desativar tipo de arquivo
+        async function deactivateTipoArquivo(idTipoArquivo) {
+    try {
+        // Exibe o alerta de confirmação
+        const result = await Swal.fire({
+            title: 'Tem certeza?',
+            text: "Você não poderá reverter essa ação!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sim, deletar!',
+            cancelButtonText: 'Cancelar'
+        });
+
+        // Se o usuário confirmar, realiza a desativação
+        if (result.isConfirmed) {
+            const response = await fetch(`/desativarTipoArquivo/${idTipoArquivo}`, {
+                method: 'PATCH',
+            });
+                window.location.href = '/tipoarquivo';
+        }
+    } catch (error) {
+        console.error('Erro ao desativar tipo arquivo:', error);
+        Swal.fire(
+            'Erro!',
+            'Ocorreu um erro inesperado.',
+            'error'
+        );
+    }
+}
+
+
+        // Função para editar tipo de arquivo
+        function editTipoArquivo(idTipoArquivo) {
+            window.location.href = `/editarTipoArquivo/${idTipoArquivo}`;
+        }
+
+        // Chama a função ao carregar a página
+        window.onload = buscarTiposDeArquivo;
+    </script>
+</body>
+
+</html>
