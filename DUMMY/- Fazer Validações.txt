@@ -1,0 +1,10 @@
+- Fazer Validações:
+	-Campo Chave Contem em Header
+
+
+-Alterar Footer
+
+/arquivo - 
+	- Regra é deletada se não clicar no botão de refresh na hora de editar
+	- Não traz a regra do campo e reinicia o campo regra
+
