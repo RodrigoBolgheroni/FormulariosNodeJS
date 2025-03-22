@@ -98,6 +98,8 @@ router.patch('/desativarArquivo/:idArquivo', connectToDatabase, async (req, res)
   }
 });
 
+
+
 // Rota para exibir a página de edição do arquivo
 router.get('/editarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
   const { idArquivo } = req.params;
@@ -147,6 +149,7 @@ router.get('/editarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
     `;
     const regrasResult = await request.query(regrasQuery);
     const regras = regrasResult.recordset;
+    console.log('Regras para renderização:', regras);
 
     // Busca clientes, tipos de arquivo e extensões ativos
     const clientesQuery = "SELECT IdCliente, Cliente FROM monitor.tblcliente WHERE Ativo = 1";
@@ -303,248 +306,268 @@ router.get('/editarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
                         </div>
                     </div>
                                                           <!-- Regras -->
-                                        <div class="row">
-                                            <div class="col-sm-12">
-                                                <div class="panel">
-                                                    <div class="panel-heading">
-                                                        Regras do Arquivo
-                                                        <button type="button" id="btnRedefinirSchema" class="btn btn-primary" style="margin-left: 20px;">
-                                                            <i class="ti-reload"></i> Redefinir Schema
-                                                        </button>
-                                                    </div>
-                                                    <div class="panel-body" id="regra-panel">
-                                                        <form id="formRegra">
-                                                            <div class="row">
-                                                                <div class="col-md-12">
-                                                                    <div class="row">
-                                                                        <div class="col-md-3">
-                                                                            <h5>Nome Campo</h5>
-                                                                        </div>
-                                                                        <div class="col-md-3">
-                                                                            <h5>Tipo De Dado</h5>
-                                                                        </div>
-                                                                        <div class="col-md-3">
-                                                                            <h5>Regra</h5>
-                                                                        </div>
-                                                                        <div class="col-md-3">
-                                                                            <h5>Obrigatório</h5>
-                                                                        </div>
-                                                                    </div>
-                                                                    <hr>
-                                                                </div>
-                                                            </div>
-                                                            ${regras.map((regra, index) => `
-                                                                <div class="row">
-                                                                    <div class="col-md-3">
-                                                                        <input type="text" class="form-control" name="DescricaoCampo${index}" value="${regra.DescricaoCampo}" readonly>
-                                                                    </div>
-                                                                    <div class="col-md-3">
-                                                                        <select class="form-control" name="TipoDeDado${index}">
-                                                                            <option value="Texto" ${regra.TipoDeDado === 'Texto' ? 'selected' : ''}>Texto</option>
-                                                                            <option value="Número" ${regra.TipoDeDado === 'Número' ? 'selected' : ''}>Número</option>
-                                                                            <option value="Data" ${regra.TipoDeDado === 'Data' ? 'selected' : ''}>Data</option>
-                                                                            <option value="Booleano" ${regra.TipoDeDado === 'Booleano' ? 'selected' : ''}>Booleano</option>
-                                                                        </select>
-                                                                    </div>
-                                                                    <div class="col-md-3">
-                                                                        <select class="form-control" name="Regra${index}">
-                                                                            <!-- Opções de regras serão preenchidas dinamicamente via JavaScript -->
-                                                                        </select>
-                                                                    </div>
-                                                                    <div class="col-md-3">
-                                                                        <input type="checkbox" name="Obrigatorio${index}" ${regra.Obrigatorio === 1 ? 'checked' : ''}>
-                                                                    </div>
-                                                                </div>
-                                                            `).join('')}
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="panel">
+            <div class="panel-heading">
+                Regras do Arquivo
+                <button type="button" id="btnRedefinirSchema" class="btn btn-primary" style="margin-left: 20px;">
+                    <i class="ti-reload"></i> Redefinir Schema
+                </button>
+            </div>
+            <div class="panel-body" id="regra-panel">
+                <form id="formRegra">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <h5>Nome Campo</h5>
+                                </div>
+                                <div class="col-md-3">
+                                    <h5>Tipo De Dado</h5>
+                                </div>
+                                <div class="col-md-3">
+                                    <h5>Regra</h5>
+                                </div>
+                                <div class="col-md-3">
+                                    <h5>Obrigatório</h5>
+                                </div>
+                            </div>
+                            <hr>
+                        </div>
+                    </div>
+                    ${regras.map(function(regra, index) {
+                        return (
+                            '<div class="row">' +
+                                '<div class="col-md-3">' +
+                                    '<input type="text" class="form-control" name="DescricaoCampo' + index + '" value="' + regra.DescricaoCampo + '" readonly>' +
+                                '</div>' +
+                                '<div class="col-md-3">' +
+                                    '<select class="form-control" name="TipoDeDado' + index + '">' +
+                                        '<option value="Texto"' + (regra.TipoDeDado === 'Texto' ? ' selected' : '') + '>Texto</option>' +
+                                        '<option value="Número"' + (regra.TipoDeDado === 'Número' ? ' selected' : '') + '>Número</option>' +
+                                        '<option value="Data"' + (regra.TipoDeDado === 'Data' ? ' selected' : '') + '>Data</option>' +
+                                        '<option value="Booleano"' + (regra.TipoDeDado === 'Booleano' ? ' selected' : '') + '>Booleano</option>' +
+                                    '</select>' +
+                                '</div>' +
+                                '<div class="col-md-3">' +
+                                    '<select class="form-control" name="Regra' + index + '" data-regra-id="' + regra.IdRegra + '">' +
+                                        '<!-- Opções de regras serão preenchidas dinamicamente via JavaScript -->' +
+                                    '</select>' +
+                                '</div>' +
+                                '<div class="col-md-3">' +
+                                    '<input type="checkbox" name="Obrigatorio' + index + '"' + (regra.Obrigatorio === 1 ? ' checked' : '') + '>' +
+                                '</div>' +
+                            '</div>'
+                        );
+                    }).join('')}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
                 </div>
             </div>
         </div>
     
-  <script src="../plugins/bower_components/jquery/dist/jquery.min.js"></script>
-  <script>
-      // Função para carregar as regras do banco de dados
-      async function carregarRegras() {
-          try {
-              const response = await fetch('/regras');
-              const regras = await response.json();
-              return regras.filter(regra => regra.Ativo === 1); // Filtra apenas regras ativas
-          } catch (error) {
-              console.error('Erro ao carregar regras:', error);
-              return [];
-          }
-      }
-  
-      // Função para preencher as opções de regras
-      async function preencherRegras() {
-          const regras = await carregarRegras();
-          document.querySelectorAll('[name^="Regra"]').forEach((select, index) => {
-              regras.forEach(regra => {
-                  const option = document.createElement('option');
-                  option.value = regra.IdRegra;
-                  option.textContent = regra.Regra;
-                  select.appendChild(option);
-              });
-          });
-      }
-  
-      // Função para gerar os inputs de regras dinamicamente
-      async function gerarInputsRegra() {
-          const formRegra = document.getElementById('formRegra');
-          const headerInput = document.getElementById('header');
-  
-          // Verifica se os elementos existem
-          if (!formRegra || !headerInput) {
-              console.error('Elementos formRegra ou headerInput não encontrados no DOM.');
-              return;
-          }
-  
-          // Verifica se o campo header está vazio
-          if (!headerInput.value.trim()) {
-              alert('O campo "Header" está vazio. Insira os valores separados por vírgula.');
-              return;
-          }
-  
-          // Limpa o conteúdo atual do formulário de regras (exceto o título e a linha)
-          const tituloELinha = formRegra.querySelector('.row:first-child');
-          if (!tituloELinha) {
-              console.error('Elemento .row:first-child não encontrado dentro de formRegra.');
-              return;
-          }
-  
-          formRegra.innerHTML = ''; // Limpa todo o conteúdo
-          formRegra.appendChild(tituloELinha); // Adiciona o título e a linha de volta
-  
-          // Separa os valores do header por vírgula
-          const headerValues = headerInput.value.split(',');
-  
-          // Verifica se há valores válidos no header
-          if (headerValues.length === 0 || headerValues.every(val => !val.trim())) {
-              alert('O campo "Header" não contém valores válidos. Insira os valores separados por vírgula.');
-              return;
-          }
-  
-          // Carrega as regras do banco de dados
-          const regras = await carregarRegras();
-  
-          // Itera sobre os valores do header para criar os inputs
-          headerValues.forEach((campo, index) => {
-              const row = document.createElement('div');
-              row.className = 'row';
-  
-              // Input para o Nome do Campo
-              const colNomeCampo = document.createElement('div');
-              colNomeCampo.className = 'form-group col-md-3';
-              const inputNomeCampo = document.createElement('input');
-              inputNomeCampo.type = 'text';
-              inputNomeCampo.className = 'form-control';
-              inputNomeCampo.value = campo.trim();
-              inputNomeCampo.required = true;
-              inputNomeCampo.readOnly = true;
-              colNomeCampo.appendChild(inputNomeCampo);
-  
-              // Select para o Tipo de Dado
-              const colTipoDado = document.createElement('div');
-              colTipoDado.className = 'form-group col-md-3';
-              const selectTipoDado = document.createElement('select');
-              selectTipoDado.className = 'form-control';
-              selectTipoDado.required = true;
-              ['Texto', 'Número', 'Data', 'Booleano'].forEach(tipo => {
-                  const option = document.createElement('option');
-                  option.value = tipo;
-                  option.textContent = tipo;
-                  selectTipoDado.appendChild(option);
-              });
-              colTipoDado.appendChild(selectTipoDado);
-  
-              // Select para a Regra
-              const colRegra = document.createElement('div');
-              colRegra.className = 'form-group col-md-3';
-              const selectRegra = document.createElement('select');
-              selectRegra.className = 'form-control';
-              selectRegra.name = 'Regra';
-              selectRegra.required = true;
-              regras.forEach(regra => {
-                  const option = document.createElement('option');
-                  option.value = regra.IdRegra;
-                  option.textContent = regra.Regra;
-                  selectRegra.appendChild(option);
-              });
-              colRegra.appendChild(selectRegra);
-  
-              // Checkbox para Obrigatório
-              const colObrigatorio = document.createElement('div');
-              colObrigatorio.className = 'form-group col-md-3';
-              const checkboxObrigatorio = document.createElement('input');
-              checkboxObrigatorio.type = 'checkbox';
-              checkboxObrigatorio.name = 'Obrigatorio';
-              checkboxObrigatorio.className = 'form-check-input';
-              colObrigatorio.appendChild(checkboxObrigatorio);
-  
-              // Adiciona as colunas à linha
-              row.appendChild(colNomeCampo);
-              row.appendChild(colTipoDado);
-              row.appendChild(colRegra);
-              row.appendChild(colObrigatorio);
-  
-              // Adiciona a linha ao formulário de regras
-              formRegra.appendChild(row);
-          });
-      }
-  
-      // Adiciona o evento ao botão "Redefinir Schema"
-      document.addEventListener('DOMContentLoaded', () => {
-          const btnRedefinirSchema = document.getElementById('btnRedefinirSchema');
-          if (btnRedefinirSchema) {
-              btnRedefinirSchema.addEventListener('click', gerarInputsRegra);
-          } else {
-              console.error('Botão btnRedefinirSchema não encontrado no DOM.');
-          }
-  
-          // Preenche as regras ao carregar a página
-          preencherRegras();
-      });
-  </script>
-  <script>
-  document.getElementById('formArquivo').addEventListener('submit', function (e) {
-      e.preventDefault(); // Evita o envio padrão do formulário
-  
-      const regras = [];
-      const regraInputs = document.querySelectorAll('#formRegra .row');
-  
-      regraInputs.forEach((row) => {
-          // Seleciona os elementos corretamente
-          const inputCampo = row.querySelector('input[type="text"]');
-          const selectTipoDado = row.querySelector('select'); 
-          const selectRegra = row.querySelector('select[name="Regra"]'); 
-          const checkboxObrigatorio = row.querySelector('input[type="checkbox"]');
-  
-          if (!inputCampo || !selectTipoDado || !selectRegra || !checkboxObrigatorio) {
-              console.error('Elementos não encontrados na linha:', row);
-              return;
-          }
-  
-          regras.push({
-              DescricaoCampo: inputCampo.value,
-              TipoDeDado: selectTipoDado.value,
-              IdRegra: selectRegra.value,
-              Obrigatorio: checkboxObrigatorio.checked ? 1 : 0
-          });
-      });
-  
-      const regrasJson = JSON.stringify(regras);
-      document.getElementById('regrasJson').value = regrasJson;
-  
-      console.log('Regras JSON:', regrasJson);
-  
-      this.submit();
-  });
-  
-  </script>
+<script src="../plugins/bower_components/jquery/dist/jquery.min.js"></script>
+<script>
+    // Função para carregar as regras do banco de dados
+    async function carregarRegras() {
+        try {
+            const response = await fetch('/regras');
+            const regras = await response.json();
+            return regras.filter(function(regra) {
+                return regra.Ativo === 1; // Filtra apenas regras ativas
+            });
+        } catch (error) {
+            console.error('Erro ao carregar regras:', error);
+            return [];
+        }
+    }
+
+    // Função para preencher as opções de regras
+    async function preencherRegras() {
+        const regras = await carregarRegras();
+
+        // Itera sobre todos os selects de regras
+        document.querySelectorAll('[name^="Regra"]').forEach(function(select, index) {
+            // Limpa as opções existentes
+            select.innerHTML = '';
+
+            // Obtém a regra cadastrada para este campo
+            const regraCadastradaId = select.dataset.regraId; // Pega o IdRegra cadastrado
+            console.log('Regra Cadastrada para o Campo ' + index + ':', regraCadastradaId);
+
+            // Preenche as opções
+            regras.forEach(function(regra) {
+                const option = document.createElement('option');
+                option.value = regra.IdRegra;
+                option.textContent = regra.Regra;
+
+                // Define a regra cadastrada como selecionada
+                if (regra.IdRegra == regraCadastradaId) { // Use == para comparar valores
+                    option.selected = true;
+                    console.log('Regra selecionada: ' + regra.Regra);
+                }
+
+                select.appendChild(option);
+            });
+        });
+    }
+
+    // Função para gerar os inputs de regras dinamicamente
+    async function gerarInputsRegra() {
+        const formRegra = document.getElementById('formRegra');
+        const headerInput = document.getElementById('header');
+
+        // Verifica se os elementos existem
+        if (!formRegra || !headerInput) {
+            console.error('Elementos formRegra ou headerInput não encontrados no DOM.');
+            return;
+        }
+
+        // Verifica se o campo header está vazio
+        if (!headerInput.value.trim()) {
+            alert('O campo "Header" está vazio. Insira os valores separados por vírgula.');
+            return;
+        }
+
+        // Limpa o conteúdo atual do formulário de regras (exceto o título e a linha)
+        const tituloELinha = formRegra.querySelector('.row:first-child');
+        if (!tituloELinha) {
+            console.error('Elemento .row:first-child não encontrado dentro de formRegra.');
+            return;
+        }
+
+        formRegra.innerHTML = ''; // Limpa todo o conteúdo
+        formRegra.appendChild(tituloELinha); // Adiciona o título e a linha de volta
+
+        // Separa os valores do header por vírgula
+        const headerValues = headerInput.value.split(',');
+
+        // Verifica se há valores válidos no header
+        if (headerValues.length === 0 || headerValues.every(function(val) { return !val.trim(); })) {
+            alert('O campo "Header" não contém valores válidos. Insira os valores separados por vírgula.');
+            return;
+        }
+
+        // Carrega as regras do banco de dados
+        const regras = await carregarRegras();
+
+        // Itera sobre os valores do header para criar os inputs
+        headerValues.forEach(function(campo, index) {
+            const row = document.createElement('div');
+            row.className = 'row';
+
+            // Input para o Nome do Campo
+            const colNomeCampo = document.createElement('div');
+            colNomeCampo.className = 'form-group col-md-3';
+            const inputNomeCampo = document.createElement('input');
+            inputNomeCampo.type = 'text';
+            inputNomeCampo.className = 'form-control';
+            inputNomeCampo.value = campo.trim();
+            inputNomeCampo.required = true;
+            inputNomeCampo.readOnly = true;
+            colNomeCampo.appendChild(inputNomeCampo);
+
+            // Select para o Tipo de Dado
+            const colTipoDado = document.createElement('div');
+            colTipoDado.className = 'form-group col-md-3';
+            const selectTipoDado = document.createElement('select');
+            selectTipoDado.className = 'form-control';
+            selectTipoDado.required = true;
+            ['Texto', 'Número', 'Data', 'Booleano'].forEach(function(tipo) {
+                const option = document.createElement('option');
+                option.value = tipo;
+                option.textContent = tipo;
+                selectTipoDado.appendChild(option);
+            });
+            colTipoDado.appendChild(selectTipoDado);
+
+            // Select para a Regra
+            const colRegra = document.createElement('div');
+            colRegra.className = 'form-group col-md-3';
+            const selectRegra = document.createElement('select');
+            selectRegra.className = 'form-control';
+            selectRegra.name = 'Regra' + index;
+            selectRegra.dataset.regraId = regras[index] ? regras[index].IdRegra : ''; // Armazena o IdRegra
+            selectRegra.required = true;
+            regras.forEach(function(regra) {
+                const option = document.createElement('option');
+                option.value = regra.IdRegra;
+                option.textContent = regra.Regra;
+                selectRegra.appendChild(option);
+            });
+            colRegra.appendChild(selectRegra);
+
+            // Checkbox para Obrigatório
+            const colObrigatorio = document.createElement('div');
+            colObrigatorio.className = 'form-group col-md-3';
+            const checkboxObrigatorio = document.createElement('input');
+            checkboxObrigatorio.type = 'checkbox';
+            checkboxObrigatorio.name = 'Obrigatorio' + index;
+            checkboxObrigatorio.className = 'form-check-input';
+            colObrigatorio.appendChild(checkboxObrigatorio);
+
+            // Adiciona as colunas à linha
+            row.appendChild(colNomeCampo);
+            row.appendChild(colTipoDado);
+            row.appendChild(colRegra);
+            row.appendChild(colObrigatorio);
+
+            // Adiciona a linha ao formulário de regras
+            formRegra.appendChild(row);
+        });
+
+        // Preenche as regras após gerar os inputs
+        preencherRegras();
+    }
+        document.getElementById('formArquivo').addEventListener('submit', function (e) {
+    e.preventDefault(); // Evita o envio padrão do formulário
+
+    const regras = [];
+    const regraInputs = document.querySelectorAll('#formRegra .row');
+
+    regraInputs.forEach((row) => {
+        const inputCampo = row.querySelector('input[type="text"]');
+        const selectTipoDado = row.querySelector('select[name^="TipoDeDado"]');
+        const selectRegra = row.querySelector('select[name^="Regra"]');
+        const checkboxObrigatorio = row.querySelector('input[type="checkbox"]');
+
+        if (!inputCampo || !selectTipoDado || !selectRegra || !checkboxObrigatorio) {
+            console.error('Elementos não encontrados na linha:', row);
+            return;
+        }
+
+        regras.push({
+            DescricaoCampo: inputCampo.value,
+            TipoDeDado: selectTipoDado.value,
+            IdRegra: selectRegra.value,
+            Obrigatorio: checkboxObrigatorio.checked ? 1 : 0
+        });
+    });
+
+    const regrasJson = JSON.stringify(regras);
+    console.log('Regras JSON:', regrasJson); // Adicione este log para depuração
+    document.getElementById('regrasJson').value = regrasJson;
+
+    this.submit(); // Envia o formulário
+});
+
+    // Adiciona o evento ao botão "Redefinir Schema"
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnRedefinirSchema = document.getElementById('btnRedefinirSchema');
+        if (btnRedefinirSchema) {
+            btnRedefinirSchema.addEventListener('click', gerarInputsRegra);
+        } else {
+            console.error('Botão btnRedefinirSchema não encontrado no DOM.');
+        }
+
+        // Preenche as regras ao carregar a página
+        preencherRegras();
+    });
+</script>
     </body>
     </html>
     `); // Mantenha o HTML original aqui
@@ -556,7 +579,8 @@ router.get('/editarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
   }
 });
 
-// Rota para editar um arquivo
+
+
 router.post('/editarArquivo', connectToDatabase, async (req, res) => {
   const {
     IdCliente_TipoArquivo,
@@ -571,19 +595,36 @@ router.post('/editarArquivo', connectToDatabase, async (req, res) => {
     regrasJson
   } = req.body;
 
-  try {
-    const regras = JSON.parse(regrasJson);
+  // Verifica se regrasJson está presente
+  if (!regrasJson) {
+    return res.status(400).send('O campo regrasJson é obrigatório.');
+  }
 
-    const request = new sql.Request();
-    request.input('IdCliente', sql.Int, IdCliente);
-    request.input('IdTipoArquivo', sql.Int, IdTipoArquivo);
-    request.input('IdExtensaoArquivo', sql.Int, IdExtensaoArquivo);
-    request.input('Encoding', sql.NVarChar, Encoding);
-    request.input('IsHeader', sql.Bit, IsHeader);
-    request.input('Header', sql.NVarChar, Header);
-    request.input('Chave', sql.NVarChar, Chave);
-    request.input('Ativo', sql.Bit, Ativo);
-    request.input('IdCliente_TipoArquivo', sql.Int, IdCliente_TipoArquivo);
+  let regras;
+  try {
+    regras = JSON.parse(regrasJson); // Tenta parsear o JSON
+  } catch (err) {
+    console.error('Erro ao parsear regrasJson:', err.message);
+    return res.status(400).send('Formato inválido para regrasJson.');
+  }
+
+  const transaction = new sql.Transaction(req.db); // Associa a transação à conexão ativa (req.db)
+
+  try {
+    // Inicia a transação
+    await transaction.begin();
+
+    // Atualizar o arquivo
+    const requestArquivo = new sql.Request(transaction);
+    requestArquivo.input('IdCliente', sql.Int, IdCliente);
+    requestArquivo.input('IdTipoArquivo', sql.Int, IdTipoArquivo);
+    requestArquivo.input('IdExtensaoArquivo', sql.Int, IdExtensaoArquivo);
+    requestArquivo.input('Encoding', sql.NVarChar, Encoding);
+    requestArquivo.input('IsHeader', sql.Bit, IsHeader);
+    requestArquivo.input('Header', sql.NVarChar, Header);
+    requestArquivo.input('Chave', sql.NVarChar, Chave);
+    requestArquivo.input('Ativo', sql.Bit, Ativo);
+    requestArquivo.input('IdCliente_TipoArquivo', sql.Int, IdCliente_TipoArquivo);
 
     const updateArquivoQuery = `
       UPDATE monitor.tblcliente_tipoarquivo
@@ -598,18 +639,23 @@ router.post('/editarArquivo', connectToDatabase, async (req, res) => {
         Ativo = @Ativo
       WHERE IdCliente_TipoArquivo = @IdCliente_TipoArquivo
     `;
-    await request.query(updateArquivoQuery);
+    await requestArquivo.query(updateArquivoQuery);
 
     // Processar as regras
     for (const regra of regras) {
       const { DescricaoCampo, TipoDeDado, IdRegra, Obrigatorio } = regra;
 
+      // Cria um novo objeto request para cada regra
+      const requestRegra = new sql.Request(transaction);
+      requestRegra.input('IdCliente_TipoArquivo', sql.Int, IdCliente_TipoArquivo);
+      requestRegra.input('DescricaoCampo', sql.NVarChar, DescricaoCampo);
+
+      // Verifica se a regra já existe
       const checkRegraQuery = `
         SELECT 1 FROM monitor.tblcliente_tipoarquivo_regra
         WHERE IdCliente_TipoArquivo = @IdCliente_TipoArquivo AND DescricaoCampo = @DescricaoCampo
       `;
-      request.input('DescricaoCampo', sql.NVarChar, DescricaoCampo);
-      const regraExists = await request.query(checkRegraQuery);
+      const regraExists = await requestRegra.query(checkRegraQuery);
 
       if (regraExists.recordset.length > 0) {
         // Atualiza a regra existente
@@ -621,10 +667,10 @@ router.post('/editarArquivo', connectToDatabase, async (req, res) => {
             Obrigatorio = @Obrigatorio
           WHERE IdCliente_TipoArquivo = @IdCliente_TipoArquivo AND DescricaoCampo = @DescricaoCampo
         `;
-        request.input('TipoDeDado', sql.NVarChar, TipoDeDado);
-        request.input('IdRegra', sql.Int, IdRegra);
-        request.input('Obrigatorio', sql.Bit, Obrigatorio);
-        await request.query(updateRegraQuery);
+        requestRegra.input('TipoDeDado', sql.NVarChar, TipoDeDado);
+        requestRegra.input('IdRegra', sql.Int, IdRegra);
+        requestRegra.input('Obrigatorio', sql.Bit, Obrigatorio);
+        await requestRegra.query(updateRegraQuery);
       } else {
         // Adiciona uma nova regra
         const insertRegraQuery = `
@@ -632,12 +678,22 @@ router.post('/editarArquivo', connectToDatabase, async (req, res) => {
           (IdCliente_TipoArquivo, DescricaoCampo, TipoDeDado, IdRegra, Obrigatorio, DataInsercao)
           VALUES (@IdCliente_TipoArquivo, @DescricaoCampo, @TipoDeDado, @IdRegra, @Obrigatorio, GETDATE())
         `;
-        await request.query(insertRegraQuery);
+        requestRegra.input('TipoDeDado', sql.NVarChar, TipoDeDado);
+        requestRegra.input('IdRegra', sql.Int, IdRegra);
+        requestRegra.input('Obrigatorio', sql.Bit, Obrigatorio);
+        await requestRegra.query(insertRegraQuery);
       }
     }
 
+    // Commit da transação
+    await transaction.commit();
+
     res.redirect('/arquivo'); // Redireciona para a página de arquivos
   } catch (err) {
+    // Rollback em caso de erro (apenas se a transação estiver ativa)
+    if (transaction._active) {
+      await transaction.rollback();
+    }
     console.error('Erro ao atualizar arquivo:', err.message);
     res.status(500).send('Erro ao atualizar arquivo');
   } finally {

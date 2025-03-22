@@ -1,3 +1,4 @@
+require('dotenv').config(); // Carrega as variáveis de ambiente do arquivo .env
 // src/conecta.js
 const config = {
   user: process.env.DB_USER,
