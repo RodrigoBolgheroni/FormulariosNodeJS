@@ -298,7 +298,7 @@ async function gerarInputsRegra() {
         inputNomeCampo.readOnly = true;
         colNomeCampo.appendChild(inputNomeCampo);
 
-        // Select para o Tipo de Dado
+        // Container para o Tipo de Dado (será substituído se a regra for "IsValoresIn")
         const colTipoDado = document.createElement('div');
         colTipoDado.className = 'form-group col-md-3';
         const selectTipoDado = document.createElement('select');
@@ -344,13 +344,33 @@ async function gerarInputsRegra() {
         row.appendChild(colRegra);
         row.appendChild(colObrigatorio);
 
+        // Verifica se a regra selecionada é "IsValoresIn" e substitui o input do tipo de dado
+        selectRegra.addEventListener('change', function () {
+        const selectedRegra = regras.find(regra => regra.IdRegra === parseInt(this.value));
+        if (selectedRegra && selectedRegra.Regra === 'ValoresIn') {
+            // Remove o select de tipo de dado
+            colTipoDado.innerHTML = '';
+
+            // Adiciona um input de texto para digitar os valores
+            const inputValoresIn = document.createElement('input');
+            inputValoresIn.type = 'text';
+            inputValoresIn.className = 'form-control tipo-dado'; // Adiciona a classe "tipo-dado"
+            inputValoresIn.placeholder = 'Digite os valores separados por vírgula';
+            inputValoresIn.required = true;
+            colTipoDado.appendChild(inputValoresIn);
+        } else {
+            // Se não for "ValoresIn", restaura o select de tipo de dado
+            colTipoDado.innerHTML = '';
+            colTipoDado.appendChild(selectTipoDado);
+        }
+    });
+
         // Adiciona a linha ao formulário de regras
         formRegra.appendChild(row);
-        
-    })
+    });
+
     loadingScreen.style.display = 'none'; // Oculta a tela de loading
 }
-
 // Adiciona o evento ao botão "Salvar Dados"
 document.getElementById('btnSalvarDados').addEventListener('click', gerarInputsRegra);
 </script>
@@ -399,17 +419,18 @@ document.getElementById('formArquivo').addEventListener('submit', function (e) {
         // Verifica se o input de texto existe
         const inputCampo = row.querySelector('input[type="text"]');
         const selectTipoDado = row.querySelector('select'); // Select para "Tipo de Dado"
+        const inputTipoDado = row.querySelector('input[type="text"].tipo-dado'); // Input de texto para "Tipo de Dado"
         const selectRegra = row.querySelector('select[name="regra"]'); // Select para "Regra"
         const checkboxObrigatorio = row.querySelector('input[type="checkbox"]'); // Checkbox para "Obrigatório"
 
         // Verifica se todos os elementos existem
-        if (!inputCampo || !selectTipoDado || !selectRegra || !checkboxObrigatorio) {
+        if (!inputCampo || (!selectTipoDado && !inputTipoDado) || !selectRegra || !checkboxObrigatorio) {
             console.error('Elementos não encontrados na linha:', row);
             return; // Pula para a próxima iteração
         }
 
         const campo = inputCampo.value; // Valor do campo "Nome do Campo"
-        const tipoDado = selectTipoDado.value; // Valor do campo "Tipo de Dado"
+        const tipoDado = inputTipoDado ? inputTipoDado.value : selectTipoDado.value; // Valor do campo "Tipo de Dado"
         const regra = selectRegra.value; // Valor do campo "Regra"
         const obrigatorio = checkboxObrigatorio.checked ? 1 : 0; // Valor do campo "Obrigatório"
 
@@ -431,6 +452,7 @@ document.getElementById('formArquivo').addEventListener('submit', function (e) {
     // Envia o formulário
     this.submit();
 });
+
 
 </script>
 </body>

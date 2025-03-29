@@ -43,10 +43,10 @@ router.get('/arquivos', connectToDatabase, async (req, res) => {
         cta.[Header], 
         cta.[Chave], 
         cta.[Ativo] 
-      FROM [monitor].[tblcliente_tipoarquivo] cta 
-      LEFT JOIN [monitor].[tblcliente] c ON cta.[IdCliente] = c.[IdCliente] 
-      LEFT JOIN [monitor].[tbltipoarquivo] ta ON cta.[IdTipoArquivo] = ta.[IdTipoArquivo] 
-      LEFT JOIN [monitor].[tblextensaoarquivo] ea ON cta.[IdExtensaoArquivo] = ea.[IdExtensaoArquivo];
+      FROM tblcliente_tipoarquivo cta 
+      LEFT JOIN tblcliente c ON cta.[IdCliente] = c.[IdCliente] 
+      LEFT JOIN tbltipoarquivo ta ON cta.[IdTipoArquivo] = ta.[IdTipoArquivo] 
+      LEFT JOIN tblextensaoarquivo ea ON cta.[IdExtensaoArquivo] = ea.[IdExtensaoArquivo];
     `;
     const result = await request.query(query);
     res.json(result.recordset);
@@ -71,7 +71,7 @@ router.patch('/desativarArquivo/:idArquivo', connectToDatabase, async (req, res)
 
       // 1. Deletar as regras associadas ao arquivo
       const deleteRegrasQuery = `
-        DELETE FROM monitor.tblcliente_tipoarquivo_regra
+        DELETE FROM tblcliente_tipoarquivo_regra
         WHERE IdCliente_TipoArquivo = @idArquivo
       `;
       request.input('idArquivo', sql.Int, idArquivo);
@@ -79,7 +79,7 @@ router.patch('/desativarArquivo/:idArquivo', connectToDatabase, async (req, res)
 
       // 2. Deletar o arquivo
       const deleteArquivoQuery = `
-        DELETE FROM monitor.tblcliente_tipoarquivo
+        DELETE FROM tblcliente_tipoarquivo
         WHERE IdCliente_TipoArquivo = @idArquivo
       `;
       await request.query(deleteArquivoQuery);
@@ -122,10 +122,10 @@ router.get('/editarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
         cta.[Header], 
         cta.[Chave], 
         cta.[Ativo] 
-      FROM [monitor].[tblcliente_tipoarquivo] cta 
-      LEFT JOIN [monitor].[tblcliente] c ON cta.[IdCliente] = c.[IdCliente] 
-      LEFT JOIN [monitor].[tbltipoarquivo] ta ON cta.[IdTipoArquivo] = ta.[IdTipoArquivo] 
-      LEFT JOIN [monitor].[tblextensaoarquivo] ea ON cta.[IdExtensaoArquivo] = ea.[IdExtensaoArquivo]
+      FROM tblcliente_tipoarquivo cta 
+      LEFT JOIN tblcliente c ON cta.[IdCliente] = c.[IdCliente] 
+      LEFT JOIN tbltipoarquivo ta ON cta.[IdTipoArquivo] = ta.[IdTipoArquivo] 
+      LEFT JOIN tblextensaoarquivo ea ON cta.[IdExtensaoArquivo] = ea.[IdExtensaoArquivo]
       WHERE cta.[IdCliente_TipoArquivo] = @idArquivo
     `;
     request.input('idArquivo', sql.Int, idArquivo);
@@ -144,7 +144,7 @@ router.get('/editarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
         TipoDeDado, 
         DescricaoCampo, 
         Obrigatorio 
-      FROM monitor.tblcliente_tipoarquivo_regra 
+      FROM tblcliente_tipoarquivo_regra 
       WHERE IdCliente_TipoArquivo = @idArquivo
     `;
     const regrasResult = await request.query(regrasQuery);
@@ -152,9 +152,9 @@ router.get('/editarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
     console.log('Regras para renderização:', regras);
 
     // Busca clientes, tipos de arquivo e extensões ativos
-    const clientesQuery = "SELECT IdCliente, Cliente FROM monitor.tblcliente WHERE Ativo = 1";
-    const tiposArquivoQuery = "SELECT IdTipoArquivo, TipoArquivo FROM monitor.tbltipoarquivo WHERE Ativo = 1";
-    const extensoesQuery = "SELECT IdExtensaoArquivo, ExtensaoArquivo FROM monitor.tblextensaoarquivo WHERE Ativo = 1";
+    const clientesQuery = "SELECT IdCliente, Cliente FROM tblcliente WHERE Ativo = 1";
+    const tiposArquivoQuery = "SELECT IdTipoArquivo, TipoArquivo FROM tbltipoarquivo WHERE Ativo = 1";
+    const extensoesQuery = "SELECT IdExtensaoArquivo, ExtensaoArquivo FROM tblextensaoarquivo WHERE Ativo = 1";
 
     const [clientesResult, tiposArquivoResult, extensoesResult] = await Promise.all([
       request.query(clientesQuery),
@@ -581,6 +581,8 @@ router.get('/editarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
 
 
 
+
+
 router.post('/editarArquivo', connectToDatabase, async (req, res) => {
   const {
     IdCliente_TipoArquivo,
@@ -627,7 +629,7 @@ router.post('/editarArquivo', connectToDatabase, async (req, res) => {
     requestArquivo.input('IdCliente_TipoArquivo', sql.Int, IdCliente_TipoArquivo);
 
     const updateArquivoQuery = `
-      UPDATE monitor.tblcliente_tipoarquivo
+      UPDATE tblcliente_tipoarquivo
       SET 
         IdCliente = @IdCliente,
         IdTipoArquivo = @IdTipoArquivo,
@@ -652,7 +654,7 @@ router.post('/editarArquivo', connectToDatabase, async (req, res) => {
 
       // Verifica se a regra já existe
       const checkRegraQuery = `
-        SELECT 1 FROM monitor.tblcliente_tipoarquivo_regra
+        SELECT 1 FROM tblcliente_tipoarquivo_regra
         WHERE IdCliente_TipoArquivo = @IdCliente_TipoArquivo AND DescricaoCampo = @DescricaoCampo
       `;
       const regraExists = await requestRegra.query(checkRegraQuery);
@@ -660,7 +662,7 @@ router.post('/editarArquivo', connectToDatabase, async (req, res) => {
       if (regraExists.recordset.length > 0) {
         // Atualiza a regra existente
         const updateRegraQuery = `
-          UPDATE monitor.tblcliente_tipoarquivo_regra
+          UPDATE tblcliente_tipoarquivo_regra
           SET 
             TipoDeDado = @TipoDeDado,
             IdRegra = @IdRegra,
@@ -674,7 +676,7 @@ router.post('/editarArquivo', connectToDatabase, async (req, res) => {
       } else {
         // Adiciona uma nova regra
         const insertRegraQuery = `
-          INSERT INTO monitor.tblcliente_tipoarquivo_regra 
+          INSERT INTO tblcliente_tipoarquivo_regra 
           (IdCliente_TipoArquivo, DescricaoCampo, TipoDeDado, IdRegra, Obrigatorio, DataInsercao)
           VALUES (@IdCliente_TipoArquivo, @DescricaoCampo, @TipoDeDado, @IdRegra, @Obrigatorio, GETDATE())
         `;
@@ -701,16 +703,47 @@ router.post('/editarArquivo', connectToDatabase, async (req, res) => {
   }
 });
 
-// Rota para cadastrar um arquivo
 router.post('/cadastroarquivo', connectToDatabase, async (req, res) => {
   const { IdCliente, IdTipoArquivo, IdExtensaoArquivo, Encoding, IsHeader, Header, Chave, Ativo, regrasJson } = req.body;
 
   try {
-    const regras = JSON.parse(regrasJson);
+    console.log('Dados recebidos:', { IdCliente, IdTipoArquivo, IdExtensaoArquivo, Encoding, IsHeader, Header, Chave, Ativo, regrasJson });
 
+    // Converte o JSON das regras
+    const regras = JSON.parse(regrasJson);
+    console.log('Regras parseadas:', regras);
+
+    // Cria uma nova instância de `sql.Request`
     const request = new sql.Request();
+
+    // Verifica se a combinação de IdCliente e IdTipoArquivo já existe
+    const checkDuplicateQuery = `
+      SELECT COUNT(*) AS count 
+      FROM tblcliente_tipoarquivo 
+      WHERE IdCliente = @IdCliente AND IdTipoArquivo = @IdTipoArquivo;
+    `;
+
     request.input('IdCliente', sql.Int, IdCliente);
     request.input('IdTipoArquivo', sql.Int, IdTipoArquivo);
+
+    const duplicateResult = await request.query(checkDuplicateQuery);
+    const count = duplicateResult.recordset[0].count;
+    console.log('Verificação de duplicidade:', { count });
+
+    if (count > 0) {
+      console.log('Combinação duplicada encontrada. Abortando inserção.');
+      return res.status(400).send('Combinação de IdCliente e IdTipoArquivo já existe.');
+    }
+
+    // Insere o arquivo na tabela `tblcliente_tipoarquivo`
+    const insertArquivoQuery = `
+      INSERT INTO tblcliente_tipoarquivo 
+      (IdCliente, IdTipoArquivo, IdExtensaoArquivo, Encoding, IsHeader, Header, Chave, Ativo, DataInsercao) 
+      VALUES (@IdCliente, @IdTipoArquivo, @IdExtensaoArquivo, @Encoding, @IsHeader, @Header, @Chave, @Ativo, GETDATE());
+      SELECT SCOPE_IDENTITY() AS IdCliente_TipoArquivo;
+    `;
+
+    // Define os parâmetros da query
     request.input('IdExtensaoArquivo', sql.Int, IdExtensaoArquivo);
     request.input('Encoding', sql.NVarChar, Encoding);
     request.input('IsHeader', sql.Bit, IsHeader);
@@ -718,34 +751,43 @@ router.post('/cadastroarquivo', connectToDatabase, async (req, res) => {
     request.input('Chave', sql.NVarChar, Chave);
     request.input('Ativo', sql.Bit, Ativo);
 
-    const insertArquivoQuery = `
-      INSERT INTO monitor.tblcliente_tipoarquivo 
-      (IdCliente, IdTipoArquivo, IdExtensaoArquivo, Encoding, IsHeader, Header, Chave, Ativo, DataInsercao) 
-      VALUES (@IdCliente, @IdTipoArquivo, @IdExtensaoArquivo, @Encoding, @IsHeader, @Header, @Chave, @Ativo, GETDATE());
-      SELECT SCOPE_IDENTITY() AS IdCliente_TipoArquivo;
-    `;
+    // Executa a query e obtém o ID gerado
     const result = await request.query(insertArquivoQuery);
     const IdCliente_TipoArquivo = result.recordset[0].IdCliente_TipoArquivo;
+    console.log('Arquivo inserido com sucesso. ID gerado:', IdCliente_TipoArquivo);
 
-    // Inserir as regras
+    // Insere as regras na tabela `tblcliente_tipoarquivo_regra`
     for (const regra of regras) {
       const { IdRegra, TipoDeDado, DescricaoCampo, Obrigatorio } = regra;
+      console.log('Processando regra:', regra);
+
+      // Cria uma nova instância de `sql.Request` para cada regra
+      const regraRequest = new sql.Request();
 
       const insertRegraQuery = `
-        INSERT INTO monitor.tblcliente_tipoarquivo_regra 
+        INSERT INTO tblcliente_tipoarquivo_regra 
         (IdCliente_TipoArquivo, IdRegra, TipoDeDado, DescricaoCampo, Obrigatorio, DataInsercao) 
         VALUES (@IdCliente_TipoArquivo, @IdRegra, @TipoDeDado, @DescricaoCampo, @Obrigatorio, GETDATE());
       `;
-      request.input('IdRegra', sql.Int, IdRegra);
-      request.input('TipoDeDado', sql.NVarChar, TipoDeDado);
-      request.input('DescricaoCampo', sql.NVarChar, DescricaoCampo);
-      request.input('Obrigatorio', sql.Bit, Obrigatorio);
-      await request.query(insertRegraQuery);
+
+      // Define os parâmetros da query
+      regraRequest.input('IdCliente_TipoArquivo', sql.Int, IdCliente_TipoArquivo);
+      regraRequest.input('IdRegra', sql.Int, IdRegra);
+      regraRequest.input('TipoDeDado', sql.NVarChar, TipoDeDado); // Usa o valor exato digitado pelo usuário
+      regraRequest.input('DescricaoCampo', sql.NVarChar, DescricaoCampo);
+      regraRequest.input('Obrigatorio', sql.Bit, Obrigatorio);
+
+      // Executa a query
+      await regraRequest.query(insertRegraQuery);
+      console.log('Regra inserida com sucesso:', regra);
     }
 
+    console.log('Todas as regras foram inseridas com sucesso.');
+    // Redireciona para a página de arquivos
     res.redirect('/arquivo');
   } catch (err) {
     console.error('Erro ao cadastrar arquivo:', err.message);
+    console.error('Stack trace:', err.stack);
     res.status(500).send('Erro ao cadastrar arquivo');
   } finally {
     await closeConnection();

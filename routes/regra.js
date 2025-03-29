@@ -29,7 +29,7 @@ const closeConnection = async () => {
 router.get('/regras', connectToDatabase, async (req, res) => {
   try {
     const request = new sql.Request();
-    const result = await request.query('SELECT IdRegra, Regra, Descricao, Ativo FROM monitor.tblregra');
+    const result = await request.query('SELECT IdRegra, Regra, Descricao, Ativo FROM tblregra');
     res.json(result.recordset);
   } catch (err) {
     console.error('Erro ao buscar regras:', err.message);
@@ -48,7 +48,7 @@ router.patch('/desativarRegra/:idRegra', connectToDatabase, async (req, res) => 
     request.input('idRegra', sql.Int, idRegra);
 
     const query = `
-      DELETE FROM monitor.tblregra 
+      DELETE FROM tblregra 
       WHERE IdRegra = @idRegra
     `;
 
@@ -78,7 +78,7 @@ router.get('/editarRegra/:idRegra', connectToDatabase, async (req, res) => {
 
     const query = `
       SELECT IdRegra, Regra, Descricao, Ativo 
-      FROM monitor.tblregra 
+      FROM tblregra 
       WHERE IdRegra = @idRegra
     `;
 
@@ -251,7 +251,7 @@ router.post('/editarRegra', connectToDatabase, async (req, res) => {
     request.input('IdRegra', sql.Int, IdRegra);
 
     const query = `
-      UPDATE monitor.tblregra
+      UPDATE tblregra
       SET Regra = @regraFinal, Descricao = @Descricao, Ativo = @ativo
       WHERE IdRegra = @IdRegra
     `;
@@ -281,7 +281,7 @@ router.post('/cadastroregra', connectToDatabase, async (req, res) => {
     request.input('ativo', sql.Int, ativo);
 
     const query = `
-      INSERT INTO monitor.tblregra (Regra, Descricao, Ativo, DataInsercao) 
+      INSERT INTO tblregra (Regra, Descricao, Ativo, DataInsercao) 
       VALUES (@regra, @descricao, @ativo, GETDATE())
     `;
 
@@ -310,8 +310,8 @@ router.get('/regrasarquivos', connectToDatabase, async (req, res) => {
         r.[Obrigatorio],
         r.[DataInsercao],
         r.[DataAlteracao]
-      FROM [monitor].[tblcliente_tipoarquivo_regra] r
-      LEFT JOIN [monitor].[tblregra] rg ON r.[IdRegra] = rg.[IdRegra]
+      FROM tblcliente_tipoarquivo_regra r
+      LEFT JOIN tblregra rg ON r.[IdRegra] = rg.[IdRegra]
     `;
 
     const result = await request.query(query);

@@ -29,7 +29,7 @@ const closeConnection = async () => {
 router.get('/clientes', connectToDatabase, async (req, res) => {
   try {
     const request = new sql.Request();
-    const result = await request.query('SELECT [IdCliente], [Cliente], [Ativo] FROM [monitor].[tblcliente]');
+    const result = await request.query('SELECT [IdCliente], [Cliente], [Ativo] FROM tblcliente');
     res.json(result.recordset);
   } catch (err) {
     console.error('Erro ao buscar clientes:', err.message);
@@ -48,7 +48,7 @@ router.patch('/desativarCliente/:idCliente', connectToDatabase, async (req, res)
     request.input('idCliente', sql.Int, idCliente);
 
     const query = `
-      DELETE FROM monitor.tblcliente 
+      DELETE FROM tblcliente 
       WHERE IdCliente = @idCliente
     `;
 
@@ -78,7 +78,7 @@ router.get('/editarCliente/:idCliente', connectToDatabase, async (req, res) => {
 
     const query = `
       SELECT IdCliente, Cliente, Ativo 
-      FROM monitor.tblcliente 
+      FROM tblcliente 
       WHERE IdCliente = @idCliente
     `;
 
@@ -245,7 +245,7 @@ router.post('/editarCliente', connectToDatabase, async (req, res) => {
     request.input('IdCliente', sql.Int, IdCliente);
 
     const query = `
-      UPDATE monitor.tblcliente 
+      UPDATE tblcliente 
       SET Cliente = @nomeFinal, Ativo = @ativo 
       WHERE IdCliente = @IdCliente
     `;
@@ -274,7 +274,7 @@ router.post('/cadastrocliente', connectToDatabase, async (req, res) => {
     request.input('ativo', sql.Int, ativo);
 
     const query = `
-      INSERT INTO monitor.tblcliente (Cliente, Ativo, DataInsercao) 
+      INSERT INTO tblcliente (Cliente, Ativo, DataInsercao) 
       VALUES (@cliente, @ativo, GETDATE())
     `;
 

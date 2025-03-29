@@ -29,7 +29,7 @@ const closeConnection = async () => {
 router.get('/extensoes', connectToDatabase, async (req, res) => {
   try {
     const request = new sql.Request();
-    const result = await request.query('SELECT IdExtensaoArquivo, ExtensaoArquivo, Ativo FROM monitor.tblextensaoarquivo');
+    const result = await request.query('SELECT IdExtensaoArquivo, ExtensaoArquivo, Ativo FROM tblextensaoarquivo');
     res.json(result.recordset);
   } catch (err) {
     console.error('Erro ao buscar extensões:', err.message);
@@ -48,7 +48,7 @@ router.patch('/desativarExtensao/:idExtensao', connectToDatabase, async (req, re
     request.input('idExtensao', sql.Int, idExtensao);
 
     const query = `
-      DELETE FROM monitor.tblextensaoarquivo 
+      DELETE FROM tblextensaoarquivo 
       WHERE IdExtensaoArquivo = @idExtensao
     `;
 
@@ -78,7 +78,7 @@ router.get('/editarExtensao/:idExtensao', connectToDatabase, async (req, res) =>
 
     const query = `
       SELECT IdExtensaoArquivo, ExtensaoArquivo, Ativo 
-      FROM monitor.tblextensaoarquivo 
+      FROM tblextensaoarquivo 
       WHERE IdExtensaoArquivo = @idExtensao
     `;
 
@@ -247,7 +247,7 @@ router.post('/editarExtensao', connectToDatabase, async (req, res) => {
     request.input('Idextensao', sql.Int, Idextensao);
 
     const query = `
-      UPDATE monitor.tblextensaoarquivo
+      UPDATE tblextensaoarquivo
       SET ExtensaoArquivo = @extensaoFinal, Ativo = @ativo
       WHERE IdExtensaoArquivo = @Idextensao
     `;
@@ -276,7 +276,7 @@ router.post('/cadastroextensao', connectToDatabase, async (req, res) => {
     request.input('ativo', sql.Int, ativo);
 
     const query = `
-      INSERT INTO monitor.tblextensaoarquivo (ExtensaoArquivo, Ativo, DataInsercao) 
+      INSERT INTO tblextensaoarquivo (ExtensaoArquivo, Ativo, DataInsercao) 
       VALUES (@extensao, @ativo, GETDATE())
     `;
 

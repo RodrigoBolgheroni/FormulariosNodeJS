@@ -21,7 +21,6 @@ O projeto possui a seguinte estrutura de diretórios e arquivos principais:
 - **.gitignore**: Especifica arquivos e diretórios que o Git deve ignorar.
 - **README.md**: Arquivo de documentação do projeto.
 - **arquivo.html**: Página para gerenciamento de arquivos.
-- **basic-table.html**: Exemplo de tabela básica.
 - **cadastroarquivo.html**: Formulário para cadastro de arquivos.
 - **cadastrocliente.html**: Formulário para cadastro de clientes.
 - **cadastroextensao.html**: Formulário para cadastro de extensões de arquivos.
@@ -31,7 +30,6 @@ O projeto possui a seguinte estrutura de diretórios e arquivos principais:
 - **clientes.html**: Página para gerenciamento de clientes.
 - **conecta.js**: Script para conexão com o banco de dados.
 - **extensoes.html**: Página para gerenciamento de extensões de arquivos.
-- **index.html**: Página inicial da aplicação.
 - **package-lock.json**: Arquivo de bloqueio de versões das dependências.
 - **package.json**: Arquivo de configuração do projeto Node.js.
 - **regra.html**: Página para gerenciamento de regras.

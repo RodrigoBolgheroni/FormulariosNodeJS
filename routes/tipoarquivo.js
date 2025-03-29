@@ -29,7 +29,7 @@ const closeConnection = async () => {
 router.get('/tiposdearquivos', connectToDatabase, async (req, res) => {
   try {
     const request = new sql.Request();
-    const result = await request.query('SELECT IdTipoArquivo, TipoArquivo, Descricao, Ativo FROM monitor.tbltipoarquivo');
+    const result = await request.query('SELECT IdTipoArquivo, TipoArquivo, Descricao, Ativo FROM tbltipoarquivo');
     res.json(result.recordset);
   } catch (err) {
     console.error('Erro ao buscar tipos de arquivo:', err.message);
@@ -48,7 +48,7 @@ router.patch('/desativarTipoArquivo/:idTipoArquivo', connectToDatabase, async (r
     request.input('idTipoArquivo', sql.Int, idTipoArquivo);
 
     const query = `
-      DELETE FROM monitor.tbltipoarquivo
+      DELETE FROM tbltipoarquivo
       WHERE IdTipoArquivo = @idTipoArquivo
     `;
 
@@ -78,7 +78,7 @@ router.get('/editarTipoArquivo/:idTipoArquivo', connectToDatabase, async (req, r
 
     const query = `
       SELECT IdTipoArquivo, TipoArquivo, Descricao, Ativo 
-      FROM monitor.tbltipoarquivo 
+      FROM tbltipoarquivo 
       WHERE IdTipoArquivo = @idTipoArquivo
     `;
 
@@ -249,7 +249,7 @@ router.post('/editarTipoArquivo', connectToDatabase, async (req, res) => {
     request.input('IdTipoArquivo', sql.Int, IdTipoArquivo);
 
     const query = `
-      UPDATE monitor.tbltipoarquivo
+      UPDATE tbltipoarquivo
       SET TipoArquivo = @tipoArquivoFinal, Descricao = @Descricao, Ativo = @ativo
       WHERE IdTipoArquivo = @IdTipoArquivo
     `;
@@ -279,7 +279,7 @@ router.post('/cadastrotipodearquivo', connectToDatabase, async (req, res) => {
     request.input('ativo', sql.Int, ativo);
 
     const query = `
-      INSERT INTO monitor.tbltipoarquivo (TipoArquivo, Descricao, Ativo, DataInsercao)
+      INSERT INTO tbltipoarquivo (TipoArquivo, Descricao, Ativo, DataInsercao)
       VALUES (@tipodearquivo, @descricao, @ativo, GETDATE())
     `;
 
