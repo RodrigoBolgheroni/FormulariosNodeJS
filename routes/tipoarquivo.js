@@ -192,8 +192,8 @@ router.get('/editarTipoArquivo/:idTipoArquivo', connectToDatabase, async (req, r
                                   <div class="form-group">
                                     <label for="ativo">Ativo</label>
                                     <select class="form-control" id="ativo" name="ativo">
-                                      <option value="1" ${tipoArquivo.Ativo === 1 ? 'selected' : ''}>Sim</option>
-                                      <option value="0" ${tipoArquivo.Ativo === 0 ? 'selected' : ''}>Não</option>
+                                      <option value="1" ${tipoArquivo.Ativo === true ? 'selected' : ''}>Sim</option>
+                                      <option value="0" ${tipoArquivo.Ativo === false ? 'selected' : ''}>Não</option>
                                     </select>
                                   </div>
                                   <button type="submit" class="btn btn-primary">Salvar Tipo Arquivo</button>

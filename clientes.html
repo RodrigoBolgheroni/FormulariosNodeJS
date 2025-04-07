@@ -9,72 +9,90 @@
     <meta name="author" content="">
     <link rel="icon" type="image/png" sizes="16x16" href="/plugins/images/favicon.png">
     <title>Ample Admin Template - The Ultimate Multipurpose admin template</title>
-    <!-- Bootstrap Core CSS -->
     <link href="bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Menu CSS -->
     <link href="/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.css" rel="stylesheet">
-    <!-- toast CSS -->
     <link href="/plugins/bower_components/toast-master/css/jquery.toast.css" rel="stylesheet">
-    <!-- morris CSS -->
     <link href="/plugins/bower_components/morrisjs/morris.css" rel="stylesheet">
-    <!-- chartist CSS -->
     <link href="/plugins/bower_components/chartist-js/dist/chartist.min.css" rel="stylesheet">
     <link href="/plugins/bower_components/chartist-plugin-tooltip-master/dist/chartist-plugin-tooltip.css" rel="stylesheet">
-    <!-- Calendar CSS -->
     <link href="/plugins/bower_components/calendar/dist/fullcalendar.css" rel="stylesheet" />
-    <!-- animation CSS -->
     <link href="css/animate.css" rel="stylesheet">
-    <!-- Custom CSS -->
     <link href="css/style.css" rel="stylesheet">
     <link href="css/edit.css" rel="stylesheet">
-    <!-- color CSS -->
     <link href="css/colors/gray-dark.css" id="theme" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .filter-icon {
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .search-input {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 5px 10px;
+            padding-left: 30px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="gray" class="bi bi-search" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: 5px center;
+            background-size: 16px;
+            margin-left: 20px;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination li {
+            list-style: none;
+            margin: 0 5px;
+        }
+
+        .pagination a {
+            border: 1px solid #ccc;
+            padding: 5px 10px;
+            text-decoration: none;
+            color: #333;
+            border-radius: 4px;
+        }
+
+        .pagination .active a {
+            background-color: #007bff;
+            color: #fff;
+        }
+    </style>
 
 </head>
 
 <body class="fix-header">
-    <!-- Tela de carregamento -->
     <div class="loading-screen" id="loadingScreen">
         <div class="loading-spinner"></div>
     </div>
-
-    <!-- ============================================================== -->
-    <!-- Preloader -->
-    <!-- ============================================================== -->
     <div class="preloader">
         <svg class="circular" viewBox="25 25 50 50">
             <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" />
         </svg>
     </div>
-
-    <!-- ============================================================== -->
-    <!-- Wrapper -->
-    <!-- ============================================================== -->
     <div id="wrapper">
-        <!-- ============================================================== -->
-        <!-- Topbar header -->
-        <!-- ============================================================== -->
         <nav class="navbar navbar-default navbar-static-top m-b-0">
             <div class="navbar-header">
                 <div class="top-left-part">
                     <a class="logo" href="index.html">
                         <span class="hidden-xs">
-                            <img src="/plugins/images/logo.webp" alt="home" class="dark-logo"  width="200px">
+                            <img src="/plugins/images/logo.webp" alt="home" class="dark-logo" width="200px">
                         </span>
                     </a>
                 </div>
             </div>
         </nav>
-
-        <!-- ============================================================== -->
-        <!-- Left Sidebar -->
-        <!-- ============================================================== -->
         <div class="navbar-default sidebar" role="navigation">
             <div class="sidebar-nav slimscrollsidebar">
                 <div class="sidebar-head">
-                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu">Navigation</span></h3>
+                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu"></span></h3>
                 </div>
                 <ul class="nav" id="side-menu">
+                    <li><a href="/dash"><i class="mdi mdi-chart-bar"></i><span class="hide-menu"> Dashboard</span></a></li>
                     <li> <a class="waves-effect active"><i class="mdi mdi-table fa-fw"></i> <span class="hide-menu">Tabelas<span class="fa arrow"></span></span></a>
                         <ul class="nav nav-second-level">
                             <li><a href="/cliente"><i class="ti-user fa-fw"></i><span class="hide-menu">Cliente</span></a></li>
@@ -83,14 +101,10 @@
                             <li><a href="/regra"><i class="ti-key fa-fw"></i><span class="hide-menu">Regra</span></a></li>
                             <li><a href="/arquivo"><i class="ti-file fa-fw"></i><span class="hide-menu">Arquivo</span></a></li>
                         </ul>
-                    </li>   
+                    </li>
                 </ul>
             </div>
         </div>
-
-        <!-- ============================================================== -->
-        <!-- Page Content -->
-        <!-- ============================================================== -->
         <div id="page-wrapper">
             <div class="container-fluid">
                 <div class="row bg-title">
@@ -104,46 +118,47 @@
                         </ol>
                     </div>
                 </div>
-
-                <!-- ============================================================== -->
-                <!-- Cadastro Cliente -->
-                <!-- ============================================================== -->
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="panel">
-                            <div class="panel-heading">
-                                TABELA CLIENTE
-                                <a href="/cadastrocliente" class="btn btn-primary btn-sm pull-right" style="margin-top: -5px;">
-                                    Adicionar Cliente
+                            <div class="panel-heading" style="display: flex;justify-content: space-between;">
+                                <div style="display: flex;">
+                                        <div class="search-container">
+                                            TABELA CLIENTE
+                                            <input type="text" class="search-input" id="searchInput" placeholder="Pesquisar Cliente">
+                                        </div>
+
+                                </div>
+                                <a href="/cadastrocliente" class="btn btn-primary btn-sm pull-right" style="height: 30px;">
+                                Adicionar Cliente
                                 </a>
+
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-hover manage-u-table">
                                     <thead>
                                         <tr>
                                             <th>Id</th>
-                                            <th>Nome</th>
+                                            <th>
+                                                Nome
+                                            </th>
                                             <th>Ativo</th>
                                             <th>Gerenciar</th>
                                         </tr>
                                     </thead>
                                     <tbody id="clientesTable">
-                                        <!-- A tabela será preenchida dinamicamente com os dados dos clientes -->
                                     </tbody>
                                 </table>
+                                <ul class="pagination" id="pagination">
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <footer class="footer text-center"> 2017 &copy; Ample Admin brought to you by themedesigner.in </footer>
+            <footer class="footer text-center"> 2025 &copy; Arker  - arker.com.br  </footer>
         </div>
     </div>
-
-    <!-- ============================================================== -->
-    <!-- All Jquery -->
-    <!-- ============================================================== -->
     <script src="/plugins/bower_components/jquery/dist/jquery.min.js"></script>
     <script src="bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.js"></script>
@@ -159,34 +174,54 @@
     <script src="js/custom.min.js"></script>
     <script src="/plugins/bower_components/toast-master/js/jquery.toast.js"></script>
     <script src="/plugins/bower_components/styleswitcher/jQuery.style.switcher.js"></script>
-    <!-- SweetAlert2 CSS e JS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <script>
+        let clientesData = [];
+        let clientesFiltrados = [];
+        let currentPage = 1;
+        const clientesPerPage = 10;
+
         async function buscarClientes() {
             const loadingScreen = document.getElementById('loadingScreen');
-            loadingScreen.style.display = 'flex'; // Exibe a tela de carregamento
+            loadingScreen.style.display = 'flex';
 
             try {
                 const response = await fetch('/clientes');
                 const clientes = await response.json();
+                clientesData = clientes;
+                clientesFiltrados = clientes;
+                updatePagination();
+                atualizarTabelaClientes(clientes);
+            } catch (error) {
+                console.error('Erro ao buscar clientes:', error);
+            } finally {
+                loadingScreen.style.display = 'none';
+            }
+        }
 
-                const tableBody = document.getElementById('clientesTable');
-                tableBody.innerHTML = ''; // Limpa a tabela antes de adicionar os novos dados
+        function atualizarTabelaClientes(clientes) {
+            const tableBody = document.getElementById('clientesTable');
+            tableBody.innerHTML = '';
 
-                const fragment = document.createDocumentFragment(); // Cria um fragmento de documento
+            const startIndex = (currentPage - 1) * clientesPerPage;
+            const endIndex = startIndex + clientesPerPage;
+            const clientesPagina = clientes.slice(startIndex, endIndex);
 
-                clientes.forEach(cliente => {
-                    const ativo = cliente.Ativo === 1 ? 'Sim' : 'Não'; // Verifica se Ativo é 1 ou 0
+            const fragment = document.createDocumentFragment();
 
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
+            clientesPagina.forEach(cliente => {
+                const ativo = cliente.Ativo === true ? 'Sim' : 'Não';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
                         <td><span class="font-medium">${cliente.IdCliente}</span></td>
                         <td><span class="font-medium">${cliente.Cliente}</span></td>
                         <td>${ativo}</td>
                         <td>
+                            <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="verResponsaveis('${cliente.IdCliente}')">
+                                <i class="ti-search"></i>
+                            </button>
                             <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="editClient('${cliente.IdCliente}')">
                                 <i class="ti-pencil-alt"></i>
                             </button>
@@ -195,57 +230,91 @@
                             </button>
                         </td>
                     `;
-                    fragment.appendChild(row); // Adiciona a linha ao fragmento
-                });
+                fragment.appendChild(row);
+            });
 
-                tableBody.appendChild(fragment); // Adiciona todo o fragmento de uma vez
-
-            } catch (error) {
-                console.error('Erro ao buscar clientes:', error);
-            } finally {
-                loadingScreen.style.display = 'none'; // Oculta a tela de carregamento
-            }
+            tableBody.appendChild(fragment);
         }
 
         function editClient(clientName) {
-            // Redireciona para a página de edição, passando o nome do cliente na URL
             window.location.href = `/editarCliente/${clientName}`;
         }
 
-        // Função para deletar cliente
         async function deactivateClient(clientName) {
-    try {
-        // Exibe o alerta de confirmação
-        const result = await Swal.fire({
-            title: 'Tem certeza?',
-            text: "Você não poderá reverter essa ação!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Sim, deletar!',
-            cancelButtonText: 'Cancelar'
+            try {
+                const result = await Swal.fire({
+                    title: 'Tem certeza?',
+                    text: "Você não poderá reverter essa ação!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sim, deletar!',
+                    cancelButtonText: 'Cancelar'
+                });
+
+                if (result.isConfirmed) {
+                    const response = await fetch(`/desativarCliente/${clientName}`, {
+                        method: 'PATCH',
+                    });
+                    window.location.href = '/cliente';
+                }
+            } catch (error) {
+                console.error('Erro ao desativar cliente:', error);
+                Swal.fire(
+                    'Erro!',
+                    'Ocorreu um erro inesperado.',
+                    'error'
+                );
+            }
+        }
+
+    
+
+
+        document.getElementById('searchInput').addEventListener('input', function () {
+            const filtro = this.value.toLowerCase();
+            clientesFiltrados = clientesData.filter(cliente =>
+                cliente.Cliente.toLowerCase().includes(filtro)
+            );
+            currentPage = 1;
+            updatePagination();
+            atualizarTabelaClientes(clientesFiltrados);
         });
 
-        // Se o usuário confirmar, realiza a desativação
-        if (result.isConfirmed) {
-            const response = await fetch(`/desativarCliente/${clientName}`, {
-                method: 'PATCH',
-            });
-                window.location.href = '/cliente';
+        function updatePagination() {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            const totalPages = Math.ceil(clientesFiltrados.length / clientesPerPage);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = 'page-item';
+                if (i === currentPage) {
+                    li.classList.add('active');
+                }
+
+                const a = document.createElement('a');
+                a.href = '#';
+                a.textContent = i;
+                a.addEventListener('click', () => {
+                    currentPage = i;
+                    updatePagination();
+                    atualizarTabelaClientes(clientesFiltrados);
+                });
+
+                li.appendChild(a);
+                pagination.appendChild(li);
+            }
         }
-    } catch (error) {
-        console.error('Erro ao desativar cliente:', error);
-        Swal.fire(
-            'Erro!',
-            'Ocorreu um erro inesperado.',
-            'error'
-        );
-    }
-}
+        function verResponsaveis(clienteId) {
+            window.location.href = `/responsavel?clienteId=${clienteId}`;
+        }
 
-
-        window.onload = buscarClientes;
+        window.onload = function () {
+            buscarClientes();
+        };
     </script>
 </body>
 

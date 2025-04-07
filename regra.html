@@ -174,7 +174,7 @@ async function buscarClientes() {
     const fragment = document.createDocumentFragment(); // Cria um fragmento de documento
 
     regras.forEach(regra => {
-      const ativo = regra.Ativo === 1 ? 'Sim' : 'Não'; // Verifica se Ativo é 1 ou 0
+      const ativo = regra.Ativo === true ? 'Sim' : 'Não'; // Verifica se Ativo é 1 ou 0
 
       const row = document.createElement('tr');
       row.innerHTML = `

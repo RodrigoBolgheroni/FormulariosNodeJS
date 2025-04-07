@@ -222,7 +222,7 @@ async function selectCliente(idClienteTipoArquivo) {
         // Verifica se encontrou alguma regra
         if (regraEspecifica.length > 0) {
             regraEspecifica.forEach(arquivoregra => {
-                const obrigatorio = arquivoregra.Obrigatorio === 1 ? 'Sim' : 'Não';
+                const obrigatorio = arquivoregra.Obrigatorio === true ? 'Sim' : 'Não';
     
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -264,7 +264,7 @@ async function selectCliente(idClienteTipoArquivo) {
             const fragment = document.createDocumentFragment(); // Cria um fragmento de documento
         
             arquivosregras.forEach(arquivoregra => {
-              const obrigatorio = arquivoregra.Obrigatorio === 1 ? 'Sim' : 'Não';
+              const obrigatorio = arquivoregra.Obrigatorio === true ? 'Sim' : 'Não';
         
               const row = document.createElement('tr');
               row.innerHTML = `
@@ -297,8 +297,8 @@ async function selectCliente(idClienteTipoArquivo) {
             const fragment = document.createDocumentFragment(); // Cria um fragmento de documento
         
             arquivos.forEach(arquivo => {
-              const ativo = arquivo.Ativo === 1 ? 'Sim' : 'Não';
-              const IsHeader = arquivo.IsHeader === 1 ? 'Sim' : 'Não';
+              const ativo = arquivo.Ativo === true ? 'Sim' : 'Não';
+              const IsHeader = arquivo.IsHeader === true ? 'Sim' : 'Não';
         
               const row = document.createElement('tr');
               row.innerHTML = `

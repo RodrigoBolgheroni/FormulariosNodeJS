@@ -1,10 +1,39 @@
-- Fazer Validações:
-	-Campo Chave Contem em Header
+Cliente(Responsavel):
+C - 
+R - 
+U - 
+D - 
+
+Tipo Arquivo:
+C - OK
+R - OK
+U - OK
+D - OK
+
+Extensão:
+C - OK
+R - OK
+U - OK
+D - OK
+
+Regra:
+C - OK
+R - OK
+U - OK
+D - OK
+
+Arquivo:
+C - 
+R - OK
+U - 
+D - 
 
 
--Alterar Footer
 
-/arquivo - 
-	- Regra é deletada se não clicar no botão de refresh na hora de editar
-	- Não traz a regra do campo e reinicia o campo regra
+http://localhost:3001/cliente:
+filtro de ordernar pelo nome
 
+http://localhost:3001/cadastroarquivo:
+Validar se chave existe em header
+Caso IsHeader for sim,botão de seleção de arquivo que pega a primeira linha e insere no header separado por virgula 
+Todas os campos tem qye ter a regra IsTipo

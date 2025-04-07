@@ -28,29 +28,54 @@
     <link href="css/style.css" rel="stylesheet">
     <!-- color CSS -->
     <link href="css/colors/gray-dark.css" id="theme" rel="stylesheet">
+    <!-- Font Awesome para os ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Estilo para o ícone de informação */
+        .info-icon {
+            cursor: pointer;
+            color: #007bff; /* Cor azul padrão */
+            margin-left: 5px;
+        }
+        .info-icon:hover{
+            color: #0056b3;
+        }
+        /* Estilo para o tooltip */
+        .tooltip-text {
+            visibility: hidden;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .info-icon:hover + .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
 </head>
 
 <body class="fix-header">
-    <!-- ============================================================== -->
-    <!-- Preloader -->
-    <!-- ============================================================== -->
-             <!-- Tela de carregamento -->
-             <div class="loading-screen" id="loadingScreen">
-                <div class="loading-spinner"></div>
-            </div>
+    <!-- Tela de carregamento -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+    </div>
     <div class="preloader">
         <svg class="circular" viewBox="25 25 50 50">
             <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" />
         </svg>
     </div>
 
-    <!-- ============================================================== -->
-    <!-- Wrapper -->
-    <!-- ============================================================== -->
     <div id="wrapper">
-        <!-- ============================================================== -->
-        <!-- Topbar header -->
-        <!-- ============================================================== -->
         <nav class="navbar navbar-default navbar-static-top m-b-0">
             <div class="navbar-header">
                 <div class="top-left-part">
@@ -63,9 +88,6 @@
             </div>
         </nav>
 
-        <!-- ============================================================== -->
-        <!-- Left Sidebar -->
-        <!-- ============================================================== -->
         <div class="navbar-default sidebar" role="navigation">
             <div class="sidebar-nav slimscrollsidebar">
                 <div class="sidebar-head">
@@ -80,14 +102,11 @@
                             <li><a href="/regra"><i class="ti-key fa-fw"></i><span class="hide-menu">Regra</span></a></li>
                             <li><a href="/arquivo"><i class="ti-file fa-fw"></i><span class="hide-menu">Arquivo</span></a></li>
                         </ul>
-                    </li>   
+                    </li>
                 </ul>
             </div>
         </div>
 
-        <!-- ============================================================== -->
-        <!-- Page Content -->
-        <!-- ============================================================== -->
         <div id="page-wrapper">
             <div class="container-fluid">
                 <div class="row bg-title">
@@ -101,7 +120,7 @@
                         </ol>
                     </div>
                 </div>
-                
+
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="panel">
@@ -111,54 +130,62 @@
                             <div class="panel-body">
                                 <form action="/cadastroarquivo" method="POST" id="formArquivo">
                                     <div class="form-group col-md-4">
-                                        <label for="cliente">Cliente</label>
+                                        <label for="cliente">Cliente *
+                                        </label>
                                         <select class="form-control" id="cliente" name="IdCliente" required>
                                             <option value="">Selecione um Cliente</option>
                                         </select>
                                     </div>
-                                
+
                                     <div class="form-group col-md-4">
-                                        <label for="tipoArquivo">Tipo Arquivo</label>
+                                        <label for="tipoArquivo">Tipo Arquivo *
+                                        </label>
                                         <select class="form-control" id="tipoArquivo" name="IdTipoArquivo" required>
                                             <option value="">Selecione um Tipo de Arquivo</option>
                                         </select>
                                     </div>
-                                
+
                                     <div class="form-group col-md-4">
-                                        <label for="extensao">Extensão</label>
+                                        <label for="extensao">Extensão *
+                                        </label>
                                         <select class="form-control" id="extensao" name="IdExtensaoArquivo" required>
                                             <option value="">Selecione uma Extensão</option>
                                         </select>
                                     </div>
-                                
+
                                     <div class="form-group col-md-6">
-                                        <label for="encoding">Encoding</label>
+                                        <label for="encoding">Encoding *
+                                        </label>
                                         <select class="form-control" id="encoding" name="Encoding" required>
                                             <option value="UTF-8">UTF-8</option>
                                             <option value="windows-1252">windows-1252</option>
                                         </select>
                                     </div>
-                                
+
                                     <div class="form-group col-md-6">
-                                        <label for="isHeader">IsHeader</label>
+                                        <label for="isHeader">IsHeader *
+                                        </label>
                                         <select class="form-control" id="isHeader" name="IsHeader" required>
                                             <option value="1">Sim</option>
                                             <option value="0">Não</option>
                                         </select>
                                     </div>
-                                
+
                                     <div class="form-group col-md-12">
-                                        <label for="header">Header</label>
-                                        <input type="text" class="form-control" id="header" name="Header" required> 
+                                        <label for="header">Header *
+                                        </label>
+                                        <input type="text" class="form-control" id="header" name="Header" required>
                                     </div>
-                                
+
                                     <div class="form-group col-md-6">
-                                        <label for="chave">Chave</label>
+                                        <label for="chave">Chave *
+                                        </label>
                                         <input type="text" class="form-control" id="chave" name="Chave" required>
                                     </div>
-                                
+
                                     <div class="form-group col-md-6">
-                                        <label for="ativo">Ativo</label>
+                                        <label for="ativo">Ativo *
+                                        </label>
                                         <select class="form-control" id="ativo" name="Ativo" required>
                                             <option value="1">Sim</option>
                                             <option value="0">Não</option>
@@ -167,10 +194,10 @@
 
                                     <!-- Campo oculto para armazenar as regras em JSON -->
                                     <input type="hidden" id="regrasJson" name="regrasJson">
-                                
+
                                     <button type="submit" class="btn btn-primary">Salvar Arquivo</button>
                                 </form>
-                                
+
                             </div>
                         </div>
                     </div>
@@ -180,26 +207,37 @@
                         <div class="panel">
                             <div class="panel-heading">
                                 Cadastro de Regra
-                                <button type="button" id="btnSalvarDados" class="btn btn-primary" style="margin-left: 20px;"><i class="ti-reload"></i>   Redefinir Schema</button>
+                                <button type="button" id="btnSalvarDados" class="btn btn-primary" style="margin-left: 20px;"><i class="ti-reload"></i> Redefinir Schema</button>
                             </div>
-                            
+
                             <div class="panel-body" id="regra-panel">
                                 <form id="formRegra">
                                     <!-- Os inputs para as regras serão gerados aqui -->
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="row">
-                                                <div class="col-md-3">
-                                                    <h5>Nome Campo</h5>
+                                                <div class="col-md-2">
+                                                    <h5>Nome Campo                                                    <i class="fas fa-info-circle info-icon"></i>
+                                                        <span class="tooltip-text">Teste.</span></h5>
+
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-2">
                                                     <h5>Tipo De Dado</h5>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-2">
+                                                    <h5>Formato</h5>
+                                                </div>
+                                                <div class="col-md-2">
                                                     <h5>Regra</h5>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-2">
+                                                    <h5>Valor</h5>
+                                                </div>
+                                                <div class="col-md-1">
                                                     <h5>Obrigatório</h5>
+                                                </div>
+                                                <div class="col-md-1" id="colunaDataHeader">
+                                                    <h5>Data</h5>
                                                 </div>
                                             </div>
                                             <hr>
@@ -210,16 +248,13 @@
                         </div>
                     </div>
                 </div>
-                
+
             </div>
 
             <footer class="footer text-center"> 2017 &copy; Ample Admin brought to you by themedesigner.in </footer>
         </div>
     </div>
 
-    <!-- ============================================================== -->
-    <!-- All Jquery -->
-    <!-- ============================================================== -->
     <script src="/plugins/bower_components/jquery/dist/jquery.min.js"></script>
     <script src="bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.js"></script>
@@ -237,143 +272,200 @@
     <script src="/plugins/bower_components/styleswitcher/jQuery.style.switcher.js"></script>
     <script>
         async function carregarRegras() {
-    try {
-        const response = await fetch('/regras');
-        const regras = await response.json();
-
-        // Filtra apenas as regras ativas (Ativo === 1)
-        const regrasAtivas = regras.filter(regra => regra.Ativo === 1);
-
-        return regrasAtivas;
-    } catch (error) {
-        console.error('Erro ao carregar regras:', error);
-        return [];
-    }
-}
-async function gerarInputsRegra() {
-    const loadingScreen = document.getElementById('loadingScreen');
-    loadingScreen.style.display = 'flex';
-    const formRegra = document.getElementById('formRegra');
-    const headerInput = document.getElementById('header');
-
-    // Verifica se o campo header está vazio
-    if (!headerInput.value.trim()) {
-        loadingScreen.style.display = 'none'; // Oculta a tela de loading
-        alert('O campo "Header" está vazio. Insira os valores separados por vírgula.');
-        return; // Interrompe a função se o header estiver vazio
-    }
-
-    // Limpa o conteúdo atual do formulário de regras (exceto o título e a linha)
-    const tituloELinha = formRegra.querySelector('.row:first-child'); // Seleciona o título e a linha
-    formRegra.innerHTML = ''; // Limpa todo o conteúdo
-    formRegra.appendChild(tituloELinha); // Adiciona o título e a linha de volta
-
-    // Separa os valores do header por vírgula
-    const headerValues = headerInput.value.split(',');
-
-    // Verifica se há valores válidos no header
-    if (headerValues.length === 0 || headerValues.every(val => !val.trim())) {
-        loadingScreen.style.display = 'none'; // Oculta a tela de loading
-        alert('O campo "Header" não contém valores válidos. Insira os valores separados por vírgula.');
-        return; // Interrompe a função se não houver valores válidos
-    }
-
-    // Carrega as regras do banco de dados
-    const regras = await carregarRegras();
-
-    // Itera sobre os valores do header para criar os inputs
-    headerValues.forEach((campo, index) => {
-        // Cria uma nova linha para os inputs
-        const row = document.createElement('div');
-        row.className = 'row';
-
-        // Input para o Nome do Campo (preenchido automaticamente)
-        const colNomeCampo = document.createElement('div');
-        colNomeCampo.className = 'form-group col-md-3';
-        const inputNomeCampo = document.createElement('input');
-        inputNomeCampo.type = 'text';
-        inputNomeCampo.className = 'form-control';
-        inputNomeCampo.value = campo.trim(); // Remove espaços em branco e preenche o valor
-        inputNomeCampo.required = true;
-        inputNomeCampo.readOnly = true;
-        colNomeCampo.appendChild(inputNomeCampo);
-
-        // Container para o Tipo de Dado (será substituído se a regra for "IsValoresIn")
-        const colTipoDado = document.createElement('div');
-        colTipoDado.className = 'form-group col-md-3';
-        const selectTipoDado = document.createElement('select');
-        selectTipoDado.className = 'form-control';
-        selectTipoDado.required = true;
-        const tiposDado = ['Texto', 'Número', 'Data', 'Booleano'];
-        tiposDado.forEach(tipo => {
-            const option = document.createElement('option');
-            option.value = tipo;
-            option.textContent = tipo;
-            selectTipoDado.appendChild(option);
-        });
-        colTipoDado.appendChild(selectTipoDado);
-
-        // Select para a Regra (preenchido com dados do banco)
-        const colRegra = document.createElement('div');
-        colRegra.className = 'form-group col-md-3';
-        const selectRegra = document.createElement('select');
-        selectRegra.className = 'form-control';
-        selectRegra.name = 'regra'; // Adicionando o name="regra"
-        selectRegra.required = true;
-
-        // Adiciona as opções de regras carregadas do banco
-        regras.forEach(regra => {
-            const option = document.createElement('option');
-            option.value = regra.IdRegra; // Usa o IdRegra como valor
-            option.textContent = regra.Regra; // Usa o campo Regra como texto
-            selectRegra.appendChild(option);
-        });
-        colRegra.appendChild(selectRegra);
-
-        // Checkbox para Obrigatório
-        const colObrigatorio = document.createElement('div');
-        colObrigatorio.className = 'form-group col-md-3';
-        const checkboxObrigatorio = document.createElement('input');
-        checkboxObrigatorio.type = 'checkbox';
-        checkboxObrigatorio.className = 'form-check-input';
-        colObrigatorio.appendChild(checkboxObrigatorio);
-
-        // Adiciona as colunas à linha
-        row.appendChild(colNomeCampo);
-        row.appendChild(colTipoDado);
-        row.appendChild(colRegra);
-        row.appendChild(colObrigatorio);
-
-        // Verifica se a regra selecionada é "IsValoresIn" e substitui o input do tipo de dado
-        selectRegra.addEventListener('change', function () {
-        const selectedRegra = regras.find(regra => regra.IdRegra === parseInt(this.value));
-        if (selectedRegra && selectedRegra.Regra === 'ValoresIn') {
-            // Remove o select de tipo de dado
-            colTipoDado.innerHTML = '';
-
-            // Adiciona um input de texto para digitar os valores
-            const inputValoresIn = document.createElement('input');
-            inputValoresIn.type = 'text';
-            inputValoresIn.className = 'form-control tipo-dado'; // Adiciona a classe "tipo-dado"
-            inputValoresIn.placeholder = 'Digite os valores separados por vírgula';
-            inputValoresIn.required = true;
-            colTipoDado.appendChild(inputValoresIn);
-        } else {
-            // Se não for "ValoresIn", restaura o select de tipo de dado
-            colTipoDado.innerHTML = '';
-            colTipoDado.appendChild(selectTipoDado);
+            try {
+                const response = await fetch('/regras');
+                const regras = await response.json();
+                const regrasAtivas = regras.filter(regra => regra.Ativo == true);
+                return regrasAtivas;
+            } catch (error) {
+                console.error('Erro ao carregar regras:', error);
+                return [];
+            }
         }
-    });
 
-        // Adiciona a linha ao formulário de regras
-        formRegra.appendChild(row);
-    });
+        async function carregarTipo() {
+            try {
+                const response = await fetch('/tipos');
+                const tipos = await response.json();
+                const tiposAtivos = tipos.filter(tipo => tipo.Ativo === 1);
+                return tiposAtivos;
+            } catch (error) {
+                console.error('Erro ao carregar tipos:', error);
+                return [];
+            }
+        }
 
-    loadingScreen.style.display = 'none'; // Oculta a tela de loading
-}
-// Adiciona o evento ao botão "Salvar Dados"
-document.getElementById('btnSalvarDados').addEventListener('click', gerarInputsRegra);
-</script>
+        async function gerarInputsRegra() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            loadingScreen.style.display = 'flex';
+            const formRegra = document.getElementById('formRegra');
+            const headerInput = document.getElementById('header');
+            const colunaDataHeader = document.getElementById('colunaDataHeader');
+
+            if (!headerInput.value.trim()) {
+                loadingScreen.style.display = 'none';
+                alert('O campo "Header" está vazio. Insira os valores separados por vírgula.');
+                return;
+            }
+
+            const tituloELinha = formRegra.querySelector('.row:first-child');
+            formRegra.innerHTML = '';
+            formRegra.appendChild(tituloELinha);
+
+            const headerValues = headerInput.value.split(',');
+
+            if (headerValues.length === 0 || headerValues.every(val => !val.trim())) {
+                loadingScreen.style.display = 'none';
+                alert('O campo "Header" não contém valores válidos. Insira os valores separados por vírgula.');
+                return;
+            }
+
+            const regras = await carregarRegras();
+            const tipoDado = await carregarTipo();
+            let dataCheckboxSelecionado = null;
+
+            headerValues.forEach((campo, index) => {
+                const row = document.createElement('div');
+                row.className = 'row';
+
+                const colNomeCampo = document.createElement('div');
+                colNomeCampo.className = 'form-group col-md-2';
+                const inputNomeCampo = document.createElement('input');
+                inputNomeCampo.type = 'text';
+                inputNomeCampo.className = 'form-control';
+                inputNomeCampo.value = campo.trim();
+                inputNomeCampo.required = true;
+                inputNomeCampo.readOnly = true;
+                inputNomeCampo.name = 'campo';
+                colNomeCampo.appendChild(inputNomeCampo);
+
+                const colTipoDado = document.createElement('div');
+                colTipoDado.className = 'form-group col-md-2';
+                const selectTipoDado = document.createElement('select');
+                selectTipoDado.className = 'form-control selectTipoDado';
+                selectTipoDado.name = 'tipo';
+                selectTipoDado.required = true;
+                tipoDado.forEach(tipo => {
+                    const option = document.createElement('option');
+                    option.value = tipo.IdTipoDeDados;
+                    option.textContent = tipo.TipoDeDado;
+                    selectTipoDado.appendChild(option);
+                });
+                colTipoDado.appendChild(selectTipoDado);
+
+                const colformato = document.createElement('div');
+                colformato.className = 'form-group col-md-2';
+                const inputformato = document.createElement('input');
+                inputformato.type = 'text';
+                inputformato.className = 'form-control';
+                inputformato.required = true;
+                inputformato.name = 'formato';
+                colformato.appendChild(inputformato);
+
+                const colValoresIn = document.createElement('div');
+                colValoresIn.className = 'form-group col-md-2';
+                const inputValoresIn = document.createElement('input');
+                inputValoresIn.type = 'text';
+                inputValoresIn.className = 'form-control tipo-dado';
+                inputValoresIn.placeholder = 'Digite os ValoresIn';
+                inputValoresIn.required = true;
+                inputValoresIn.readOnly = true;
+                inputValoresIn.name = 'valor';
+                colValoresIn.appendChild(inputValoresIn);
+
+                const colRegra = document.createElement('div');
+                colRegra.className = 'form-group col-md-2';
+                const selectRegra = document.createElement('select');
+                selectRegra.className = 'form-control';
+                selectRegra.name = 'regra';
+                selectRegra.required = true;
+                regras.forEach(regra => {
+                    const option = document.createElement('option');
+                    option.value = regra.IdRegra;
+                    option.textContent = regra.Regra;
+                    selectRegra.appendChild(option);
+                });
+                colRegra.appendChild(selectRegra);
+
+                const colObrigatorio = document.createElement('div');
+                colObrigatorio.className = 'form-group col-md-1';
+                const checkboxObrigatorio = document.createElement('input');
+                checkboxObrigatorio.type = 'checkbox';
+                checkboxObrigatorio.className = 'form-check-input';
+                colObrigatorio.appendChild(checkboxObrigatorio);
+
+                const colData = document.createElement('div');
+                colData.className = 'form-group col-md-1';
+                const checkboxData = document.createElement('input');
+                checkboxData.type = 'checkbox';
+                checkboxData.name = 'checkboxData';
+                checkboxData.className = 'form-check-input checkboxData';
+                checkboxData.disabled = true; // Inicialmente desabilitado
+                colData.appendChild(checkboxData);
+
+                row.appendChild(colNomeCampo);
+                row.appendChild(colTipoDado);
+                row.appendChild(colformato);
+                row.appendChild(colRegra);
+                row.appendChild(colValoresIn);
+                row.appendChild(colObrigatorio);
+                row.appendChild(colData);
+
+                // Evento para mostrar/ocultar a coluna "Data"
+                selectTipoDado.addEventListener('change', function () {
+                    const selectedTipo = tipoDado.find(tipo => tipo.IdTipoDeDados === parseInt(this.value));
+                    if (selectedTipo && selectedTipo.TipoDeDado === 'date') {
+                        checkboxData.disabled = false;
+                    } else {
+                        checkboxData.disabled = true;
+                        checkboxData.checked = false;
+                    }
+                });
+
+                // Evento para controlar a seleção única do checkbox "Data"
+                checkboxData.addEventListener('change', function () {
+                    if (this.checked) {
+                        if (dataCheckboxSelecionado && dataCheckboxSelecionado !== this) {
+                            dataCheckboxSelecionado.checked = false;
+                        }
+                        dataCheckboxSelecionado = this;
+                        // Desabilita todos os outros checkboxes de data
+                        document.querySelectorAll('.checkboxData').forEach(cb => {
+                            if (cb !== this) {
+                                if (selectedTipo && selectedTipo.TipoDeDado === 'date') {
+                                cb.disabled = true;}
+                            }
+                        });
+                    } else {
+                        dataCheckboxSelecionado = null;
+                        // Habilita todos os outros checkboxes de data
+                        document.querySelectorAll('.checkboxData').forEach(cb => {
+                            cb.disabled = false;
+                        });
+                    }
+                });
+
+                selectRegra.addEventListener('change', function () {
+                    const selectedRegra = regras.find(regra => regra.IdRegra === parseInt(this.value));
+                    if (selectedRegra && selectedRegra.Regra === 'ValoresIn') {
+                        inputValoresIn.readOnly = false;
+                        inputformato.readOnly = true;
+                        inputformato.value = "";
+                    } else {
+                        inputValoresIn.readOnly = true;
+                        inputformato.readOnly = false;
+                        inputValoresIn.value = "";
+                    }
+                });
+
+                formRegra.appendChild(row);
+            });
+
+            loadingScreen.style.display = 'none';
+        }
+
+        document.getElementById('btnSalvarDados').addEventListener('click', gerarInputsRegra);
+    </script>
 
     <script>
         async function carregarDados(endpoint, selectId, idCampo, nomeCampo, ativoCampo) {
@@ -381,79 +473,72 @@ document.getElementById('btnSalvarDados').addEventListener('click', gerarInputsR
                 const response = await fetch(endpoint);
                 const dados = await response.json();
                 const select = document.getElementById(selectId);
-    
-                // Filtra apenas os registros que possuem Ativo === 1
-                const dadosFiltrados = dados.filter(item => item[ativoCampo] === 1);
-    
+                const dadosFiltrados = dados.filter(item => item[ativoCampo] === true);
                 dadosFiltrados.forEach(item => {
                     const option = document.createElement("option");
-                    option.value = item[idCampo];  // Define o valor do option com o ID
-                    option.textContent = item[nomeCampo]; // Define o texto do option com o nome
+                    option.value = item[idCampo];
+                    option.textContent = item[nomeCampo];
                     select.appendChild(option);
                 });
             } catch (error) {
                 console.error(`Erro ao carregar ${selectId}:`, error);
             }
         }
-    
-        // Chamando a função para preencher os selects
+
         const loadingScreen = document.getElementById('loadingScreen');
-        loadingScreen.style.display = 'none'; // Oculta a tela de
-        carregarDados('/clientes', 'cliente', 'IdCliente', 'Cliente','Ativo');
-        carregarDados('/tiposdearquivos', 'tipoArquivo', 'IdTipoArquivo', 'TipoArquivo','Ativo');
-        carregarDados('/extensoes', 'extensao', 'IdExtensaoArquivo', 'ExtensaoArquivo','Ativo');
-
+        loadingScreen.style.display = 'none';
+        carregarDados('/clientes', 'cliente', 'IdCliente', 'Cliente', 'Ativo');
+        carregarDados('/tiposdearquivos', 'tipoArquivo', 'IdTipoArquivo', 'TipoArquivo', 'Ativo');
+        carregarDados('/extensoes', 'extensao', 'IdExtensaoArquivo', 'ExtensaoArquivo', 'Ativo');
     </script>
-<script>
-document.getElementById('formArquivo').addEventListener('submit', function (e) {
-    e.preventDefault(); // Evita o envio padrão do formulário
+    <script>
+        document.getElementById('formArquivo').addEventListener('submit', function (e) {
+            e.preventDefault();
 
-    // Captura os dados das regras
-    const regras = [];
-    const regraInputs = document.querySelectorAll('#formRegra .row');
+            const regras = [];
+            const regraInputs = document.querySelectorAll('#formRegra .row');
 
-    regraInputs.forEach((row, index) => {
-        // Ignora a primeira linha (títulos)
-        if (index === 0) return;
+            regraInputs.forEach((row, index) => {
+                if (index === 0) return;
 
-        // Verifica se o input de texto existe
-        const inputCampo = row.querySelector('input[type="text"]');
-        const selectTipoDado = row.querySelector('select'); // Select para "Tipo de Dado"
-        const inputTipoDado = row.querySelector('input[type="text"].tipo-dado'); // Input de texto para "Tipo de Dado"
-        const selectRegra = row.querySelector('select[name="regra"]'); // Select para "Regra"
-        const checkboxObrigatorio = row.querySelector('input[type="checkbox"]'); // Checkbox para "Obrigatório"
+                const inputCampo = row.querySelector('input[name="campo"]');
+                const selectTipoDado = row.querySelector('select[name="tipo"]');
+                const inputFormato = row.querySelector('input[name="formato"]');
+                const selectRegra = row.querySelector('select[name="regra"]');
+                const inputValor = row.querySelector('input[name="valor"]');
+                const checkboxObrigatorio = row.querySelector('input[type="checkbox"]');
+                const checkboxData = row.querySelector('input[name="checkboxData"]');
 
-        // Verifica se todos os elementos existem
-        if (!inputCampo || (!selectTipoDado && !inputTipoDado) || !selectRegra || !checkboxObrigatorio) {
-            console.error('Elementos não encontrados na linha:', row);
-            return; // Pula para a próxima iteração
-        }
+                if (!inputCampo || !selectTipoDado || !selectRegra || !checkboxObrigatorio) {
+                    console.error('Elementos não encontrados na linha:', row);
+                    return;
+                }
 
-        const campo = inputCampo.value; // Valor do campo "Nome do Campo"
-        const tipoDado = inputTipoDado ? inputTipoDado.value : selectTipoDado.value; // Valor do campo "Tipo de Dado"
-        const regra = selectRegra.value; // Valor do campo "Regra"
-        const obrigatorio = checkboxObrigatorio.checked ? 1 : 0; // Valor do campo "Obrigatório"
+                const campo = inputCampo.value;
+                const tipoDado = selectTipoDado.value;
+                const formato = inputFormato.value;
+                const regra = selectRegra.value;
+                const valor = inputValor.value;
+                const obrigatorio = checkboxObrigatorio.checked ? 1 : 0;
+                const data = checkboxData.checked ? 1 : 0;
 
-        regras.push({
-            DescricaoCampo: campo,
-            TipoDeDado: tipoDado,
-            IdRegra: regra,
-            Obrigatorio: obrigatorio
+                regras.push({
+                    DescricaoCampo: campo,
+                    TipoDeDado: tipoDado,
+                    Formato: formato,
+                    IdRegra: regra,
+                    Valor: valor,
+                    Obrigatorio: obrigatorio,
+                    Data: data
+                });
+            });
+
+            const regrasJson = JSON.stringify(regras);
+            document.getElementById('regrasJson').value = regrasJson;
+            console.log('Regras JSON:', regrasJson);
+            this.submit();
         });
-    });
-
-    // Atualiza o campo oculto com os dados das regras em JSON
-    const regrasJson = JSON.stringify(regras);
-    document.getElementById('regrasJson').value = regrasJson;
-
-    // Log para verificar o valor de regrasJson
-    console.log('Regras JSON:', regrasJson);
-
-    // Envia o formulário
-    this.submit();
-});
-
-
-</script>
+    </script>
 </body>
+
 </html>

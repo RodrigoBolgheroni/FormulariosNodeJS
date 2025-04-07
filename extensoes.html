@@ -173,7 +173,7 @@
                 tableBody.innerHTML = ''; // Limpa a tabela antes de adicionar os novos dados
     
                 clientes.forEach(cliente => {
-                    const ativo = cliente.Ativo === 1 ? 'Sim' : 'Não'; // Verifica se Ativo é 1 ou 0
+                    const ativo = cliente.Ativo === true ? 'Sim' : 'Não'; // Verifica se Ativo é 1 ou 0
     
                     const row = document.createElement('tr');
                     row.innerHTML = `

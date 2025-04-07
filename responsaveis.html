@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" type="image/png" sizes="16x16" href="/plugins/images/favicon.png">
+    <title>Ample Admin Template - The Ultimate Multipurpose admin template</title>
+    <link href="bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.css" rel="stylesheet">
+    <link href="/plugins/bower_components/toast-master/css/jquery.toast.css" rel="stylesheet">
+    <link href="/plugins/bower_components/morrisjs/morris.css" rel="stylesheet">
+    <link href="/plugins/bower_components/chartist-js/dist/chartist.min.css" rel="stylesheet">
+    <link href="/plugins/bower_components/chartist-plugin-tooltip-master/dist/chartist-plugin-tooltip.css" rel="stylesheet">
+    <link href="/plugins/bower_components/calendar/dist/fullcalendar.css" rel="stylesheet" />
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/edit.css" rel="stylesheet">
+    <link href="css/colors/gray-dark.css" id="theme" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .filter-icon {
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .search-input {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 5px 10px;
+            padding-left: 30px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="gray" class="bi bi-search" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: 5px center;
+            background-size: 16px;
+            margin-left: 20px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination li {
+            list-style: none;
+            margin: 0 5px;
+        }
+
+        .pagination a {
+            border: 1px solid #ccc;
+            padding: 5px 10px;
+            text-decoration: none;
+            color: #333;
+            border-radius: 4px;
+        }
+
+        .pagination .active a {
+            background-color: #007bff;
+            color: #fff;
+        }
+    </style>
+
+</head>
+
+<body class="fix-header">
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+    </div>
+    <div class="preloader">
+        <svg class="circular" viewBox="25 25 50 50">
+            <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" />
+        </svg>
+    </div>
+    <div id="wrapper">
+        <nav class="navbar navbar-default navbar-static-top m-b-0">
+            <div class="navbar-header">
+                <div class="top-left-part">
+                    <a class="logo" href="index.html">
+                        <span class="hidden-xs">
+                            <img src="/plugins/images/logo.webp" alt="home" class="dark-logo" width="200px">
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+        <div class="navbar-default sidebar" role="navigation">
+            <div class="sidebar-nav slimscrollsidebar">
+                <div class="sidebar-head">
+                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu">Navigation</span></h3>
+                </div>
+                <ul class="nav" id="side-menu">
+                    <li> <a class="waves-effect active"><i class="mdi mdi-table fa-fw"></i> <span class="hide-menu">Tabelas<span class="fa arrow"></span></span></a>
+                        <ul class="nav nav-second-level">
+                            <li><a href="/cliente"><i class="ti-user fa-fw"></i><span class="hide-menu">Cliente</span></a></li>
+                            <li><a href="/tipoarquivo"><i class="ti-files fa-fw"></i><span class="hide-menu">Tipo Arquivo</span></a></li>
+                            <li><a href="/extensao"><i class="ti-file fa-fw"></i><span class="hide-menu">Extensão</span></a></li>
+                            <li><a href="/regra"><i class="ti-key fa-fw"></i><span class="hide-menu">Regra</span></a></li>
+                            <li><a href="/arquivo"><i class="ti-file fa-fw"></i><span class="hide-menu">Arquivo</span></a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="page-wrapper">
+            <div class="container-fluid">
+                <div class="row bg-title">
+                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                        <h4 class="page-title">Responsaveis</h4>
+                    </div>
+                    <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
+                        <ol class="breadcrumb">
+                            <li><a href="#">Tabelas</a></li>
+                            <li class="active">Responsaveis</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <span id="tituloTabela">TABELA RESPONSAVEIS</span><span id="nomeCliente" style="margin-left: 10px; font-weight: bold;"></span>
+                                <a href="/cliente" class="btn btn-primary btn-sm pull-right" style="height: 30px;">
+                                    Ver Clientes
+                                </a>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-hover manage-u-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Id</th>
+                                            <th>Id Do Cliente</th>
+                                            <th>Nome</th>
+                                            <th>Email</th>
+                                            <th>Ativo</th>
+                                            <th>Gerenciar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="responsaveisTable">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="footer text-center"> 2025 &copy; Arker - arker.com.br </footer>
+        </div>
+    </div>
+    <script src="/plugins/bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.js"></script>
+    <script src="js/jquery.slimscroll.js"></script>
+    <script src="js/waves.js"></script>
+    <script src="/plugins/bower_components/waypoints/lib/jquery.waypoints.js"></script>
+    <script src="/plugins/bower_components/counterup/jquery.counterup.min.js"></script>
+    <script src="/plugins/bower_components/chartist-js/dist/chartist.min.js"></script>
+    <script src="/plugins/bower_components/chartist-plugin-tooltip-master/dist/chartist-plugin-tooltip.min.js"></script>
+    <script src="/plugins/bower_components/moment/moment.js"></script>
+    <script src='/plugins/bower_components/calendar/dist/fullcalendar.min.js'></script>
+    <script src="/plugins/bower_components/calendar/dist/cal-init.js"></script>
+    <script src="js/custom.min.js"></script>
+    <script src="/plugins/bower_components/toast-master/js/jquery.toast.js"></script>
+    <script src="/plugins/bower_components/styleswitcher/jQuery.style.switcher.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script>
+        async function buscarResponsaveis(clienteId) {
+            const loadingScreen = document.getElementById('loadingScreen');
+            loadingScreen.style.display = 'flex';
+
+            try {
+                const response = await fetch(`/responsaveis?clienteId=${clienteId}`);
+                const responsaveis = await response.json();
+
+                const tableBody = document.getElementById('responsaveisTable');
+                tableBody.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+
+                responsaveis.forEach(responsavel => {
+                    document.getElementById('nomeCliente').textContent = `- ${responsavel.NomeCliente}`;
+                    const ativo = responsavel.Ativo === true ? 'Sim' : 'Não';
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><span class="font-medium">${responsavel.IdResponsavel}</span></td>
+                        <td><span class="font-medium">${responsavel.IdCliente}</span></td>
+                        <td><span class="font-medium">${responsavel.Responsavel}</span></td>
+                        <td><span class="font-medium">${responsavel.Email}</span></td>
+                        <td>${ativo}</td>
+                        <td>
+                            <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="editClient('${responsavel.IdCliente}')">
+                                <i class="ti-pencil-alt"></i>
+                            </button>
+                            <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="deactivateResponsavel('${responsavel.IdResponsavel}')">
+                                <i class="icon-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    fragment.appendChild(row);
+                });
+
+                tableBody.appendChild(fragment);
+
+                // Atualiza o título da tabela com o nome do cliente
+
+            } catch (error) {
+                console.error('Erro ao buscar clientes:', error);
+            } finally {
+                loadingScreen.style.display = 'none';
+            }
+        }
+        function editClient(clientName) {
+            window.location.href = `/editarCliente/${clientName}`;
+        }
+        async function deactivateResponsavel(idResponsavel) {
+    try {
+        // Exibe o alerta de confirmação
+        const result = await Swal.fire({
+            title: 'Tem certeza?',
+            text: "Você não poderá reverter essa ação!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sim, deletar!',
+            cancelButtonText: 'Cancelar'
+        });
+
+        // Se o usuário confirmar, realiza a desativação
+        if (result.isConfirmed) {
+            const response = await fetch(`/responsavel/${idResponsavel}`, {
+                method: 'DELETE',
+            });
+            
+            // Verifica se a resposta foi bem sucedida
+            if (response.ok) {
+                const data = await response.json();
+                window.location.reload();
+            } else {
+                // Se a resposta não foi ok, mostra a mensagem de erro
+                const errorData = await response.json();
+                await Swal.fire(
+                    'Erro!',
+                    errorData.message || 'Não foi possível deletar o responsável',
+                    'error'
+                );
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao desativar responsavel:', error);
+        Swal.fire(
+            'Erro!',
+            'Ocorreu um erro inesperado ao conectar com o servidor.',
+            'error'
+        );
+    }
+}
+
+        function getClienteIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('clienteId');
+        }
+
+        window.onload = function () {
+            const clienteId = getClienteIdFromUrl();
+            if (clienteId) {
+                buscarResponsaveis(clienteId);
+            }
+        };
+    </script>
+</body>
+
+</html>

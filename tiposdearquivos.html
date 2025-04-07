@@ -206,7 +206,7 @@
                 tableBody.innerHTML = ''; // Limpa a tabela antes de adicionar os novos dados
 
                 tiposDeArquivo.forEach(tipo => {
-                    const ativo = tipo.Ativo === 1 ? 'Sim' : 'Não'; // Verifica se Ativo é 1 ou 0
+                    const ativo = tipo.Ativo === true ? 'Sim' : 'Não'; // Verifica se Ativo é 1 ou 0
 
                     const row = document.createElement('tr');
                     row.innerHTML = `

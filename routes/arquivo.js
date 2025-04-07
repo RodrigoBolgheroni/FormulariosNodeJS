@@ -141,7 +141,7 @@ router.get('/editarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
     const regrasQuery = `
       SELECT 
         IdRegra, 
-        TipoDeDado, 
+        IdTipoDeDado, 
         DescricaoCampo, 
         Obrigatorio 
       FROM tblcliente_tipoarquivo_regra 
@@ -294,8 +294,8 @@ router.get('/editarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
                                         <div class="form-group col-md-6">
                                             <label for="ativo">Ativo</label>
                                             <select class="form-control" id="ativo" name="Ativo" required>
-                                                <option value="1" ${arquivo.Ativo === 1 ? 'selected' : ''}>Sim</option>
-                                                <option value="0" ${arquivo.Ativo === 0 ? 'selected' : ''}>Não</option>
+                                                <option value="1" ${arquivo.Ativo === true ? 'selected' : ''}>Sim</option>
+                                                <option value="0" ${arquivo.Ativo === false ? 'selected' : ''}>Não</option>
                                             </select>
                                         </div>  
                                         <input type="hidden" id="regrasJson" name="regrasJson">
@@ -344,10 +344,10 @@ router.get('/editarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
                                 '</div>' +
                                 '<div class="col-md-3">' +
                                     '<select class="form-control" name="TipoDeDado' + index + '">' +
-                                        '<option value="Texto"' + (regra.TipoDeDado === 'Texto' ? ' selected' : '') + '>Texto</option>' +
-                                        '<option value="Número"' + (regra.TipoDeDado === 'Número' ? ' selected' : '') + '>Número</option>' +
-                                        '<option value="Data"' + (regra.TipoDeDado === 'Data' ? ' selected' : '') + '>Data</option>' +
-                                        '<option value="Booleano"' + (regra.TipoDeDado === 'Booleano' ? ' selected' : '') + '>Booleano</option>' +
+                                        '<option value="Texto"' + (regra.IdTipoDeDado === 'Texto' ? ' selected' : '') + '>Texto</option>' +
+                                        '<option value="Número"' + (regra.IdTipoDeDado === 'Número' ? ' selected' : '') + '>Número</option>' +
+                                        '<option value="Data"' + (regra.IdTipoDeDado === 'Data' ? ' selected' : '') + '>Data</option>' +
+                                        '<option value="Booleano"' + (regra.IdTipoDeDado === 'Booleano' ? ' selected' : '') + '>Booleano</option>' +
                                     '</select>' +
                                 '</div>' +
                                 '<div class="col-md-3">' +
@@ -378,7 +378,7 @@ router.get('/editarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
             const response = await fetch('/regras');
             const regras = await response.json();
             return regras.filter(function(regra) {
-                return regra.Ativo === 1; // Filtra apenas regras ativas
+                return regra.Ativo === true; // Filtra apenas regras ativas
             });
         } catch (error) {
             console.error('Erro ao carregar regras:', error);
@@ -625,7 +625,7 @@ router.post('/editarArquivo', connectToDatabase, async (req, res) => {
     requestArquivo.input('IsHeader', sql.Bit, IsHeader);
     requestArquivo.input('Header', sql.NVarChar, Header);
     requestArquivo.input('Chave', sql.NVarChar, Chave);
-    requestArquivo.input('Ativo', sql.Bit, Ativo);
+    requestArquivo.input('Ativo', sql.Int, Ativo);
     requestArquivo.input('IdCliente_TipoArquivo', sql.Int, IdCliente_TipoArquivo);
 
     const updateArquivoQuery = `
@@ -713,6 +713,11 @@ router.post('/cadastroarquivo', connectToDatabase, async (req, res) => {
     const regras = JSON.parse(regrasJson);
     console.log('Regras parseadas:', regras);
 
+    // Encontra o campo selecionado como Data
+    const campoData = regras.find(regra => regra.Data === 1);
+    const nomeCampoData = campoData ? campoData.DescricaoCampo : null;
+    console.log('Nome do campo data:', nomeCampoData);
+
     // Cria uma nova instância de `sql.Request`
     const request = new sql.Request();
 
@@ -738,8 +743,8 @@ router.post('/cadastroarquivo', connectToDatabase, async (req, res) => {
     // Insere o arquivo na tabela `tblcliente_tipoarquivo`
     const insertArquivoQuery = `
       INSERT INTO tblcliente_tipoarquivo 
-      (IdCliente, IdTipoArquivo, IdExtensaoArquivo, Encoding, IsHeader, Header, Chave, Ativo, DataInsercao) 
-      VALUES (@IdCliente, @IdTipoArquivo, @IdExtensaoArquivo, @Encoding, @IsHeader, @Header, @Chave, @Ativo, GETDATE());
+      (IdCliente, IdTipoArquivo, IdExtensaoArquivo, Encoding, IsHeader, Header, Chave, Ativo, NomeCampoData, DataInsercao) 
+      VALUES (@IdCliente, @IdTipoArquivo, @IdExtensaoArquivo, @Encoding, @IsHeader, @Header, @Chave, @Ativo, @NomeCampoData, GETDATE());
       SELECT SCOPE_IDENTITY() AS IdCliente_TipoArquivo;
     `;
 
@@ -749,7 +754,8 @@ router.post('/cadastroarquivo', connectToDatabase, async (req, res) => {
     request.input('IsHeader', sql.Bit, IsHeader);
     request.input('Header', sql.NVarChar, Header);
     request.input('Chave', sql.NVarChar, Chave);
-    request.input('Ativo', sql.Bit, Ativo);
+    request.input('Ativo', sql.Int, Ativo);
+    request.input('NomeCampoData', sql.NVarChar, nomeCampoData); // Adiciona o NomeCampoData
 
     // Executa a query e obtém o ID gerado
     const result = await request.query(insertArquivoQuery);
@@ -758,7 +764,7 @@ router.post('/cadastroarquivo', connectToDatabase, async (req, res) => {
 
     // Insere as regras na tabela `tblcliente_tipoarquivo_regra`
     for (const regra of regras) {
-      const { IdRegra, TipoDeDado, DescricaoCampo, Obrigatorio } = regra;
+      const { IdRegra, TipoDeDado, Formato, DescricaoCampo, Obrigatorio, Data } = regra;
       console.log('Processando regra:', regra);
 
       // Cria uma nova instância de `sql.Request` para cada regra
@@ -766,14 +772,15 @@ router.post('/cadastroarquivo', connectToDatabase, async (req, res) => {
 
       const insertRegraQuery = `
         INSERT INTO tblcliente_tipoarquivo_regra 
-        (IdCliente_TipoArquivo, IdRegra, TipoDeDado, DescricaoCampo, Obrigatorio, DataInsercao) 
-        VALUES (@IdCliente_TipoArquivo, @IdRegra, @TipoDeDado, @DescricaoCampo, @Obrigatorio, GETDATE());
+        (IdCliente_TipoArquivo, IdRegra, IdTipoDeDado,Formato, DescricaoCampo, Obrigatorio,DataInsercao) 
+        VALUES (@IdCliente_TipoArquivo, @IdRegra, @TipoDeDado,@Formato, @DescricaoCampo, @Obrigatorio, GETDATE());
       `;
 
       // Define os parâmetros da query
       regraRequest.input('IdCliente_TipoArquivo', sql.Int, IdCliente_TipoArquivo);
       regraRequest.input('IdRegra', sql.Int, IdRegra);
-      regraRequest.input('TipoDeDado', sql.NVarChar, TipoDeDado); // Usa o valor exato digitado pelo usuário
+      regraRequest.input('TipoDeDado', sql.Int, TipoDeDado); // Usa o valor exato digitado pelo usuário
+      regraRequest.input('Formato', sql.VarChar, Formato);
       regraRequest.input('DescricaoCampo', sql.NVarChar, DescricaoCampo);
       regraRequest.input('Obrigatorio', sql.Bit, Obrigatorio);
 
@@ -789,6 +796,20 @@ router.post('/cadastroarquivo', connectToDatabase, async (req, res) => {
     console.error('Erro ao cadastrar arquivo:', err.message);
     console.error('Stack trace:', err.stack);
     res.status(500).send('Erro ao cadastrar arquivo');
+  } finally {
+    await closeConnection();
+  }
+});
+
+// Rota para buscar dados das regras
+router.get('/tipos', connectToDatabase, async (req, res) => {
+  try {
+    const request = new sql.Request();
+    const result = await request.query('SELECT [IdTipoDeDados],[TipoDeDado],[TipoSqlConvert],[TipoValidacao],[Ativo] FROM tbltipodedados');
+    res.json(result.recordset);
+  } catch (err) {
+    console.error('Erro ao buscar tipo de dados:', err.message);
+    res.status(500).send('Erro ao buscar tipo de dados');
   } finally {
     await closeConnection();
   }

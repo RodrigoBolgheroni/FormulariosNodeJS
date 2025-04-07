@@ -190,8 +190,8 @@ router.get('/editarExtensao/:idExtensao', connectToDatabase, async (req, res) =>
                                   <div class="form-group">
                                     <label for="ativo">Ativo</label>
                                     <select class="form-control" id="ativo" name="ativo">
-                                      <option value="1" ${extensao.Ativo === 1 ? 'selected' : ''}>Sim</option>
-                                      <option value="0" ${extensao.Ativo === 0 ? 'selected' : ''}>Não</option>
+                                      <option value="1" ${extensao.Ativo === true ? 'selected' : ''}>Sim</option>
+                                      <option value="0" ${extensao.Ativo === false ? 'selected' : ''}>Não</option>
                                     </select>
                                   </div>
                                   <button type="submit" class="btn btn-primary">Salvar Extensao</button>
@@ -274,6 +274,7 @@ router.post('/cadastroextensao', connectToDatabase, async (req, res) => {
     const request = new sql.Request();
     request.input('extensao', sql.VarChar, extensao);
     request.input('ativo', sql.Int, ativo);
+
 
     const query = `
       INSERT INTO tblextensaoarquivo (ExtensaoArquivo, Ativo, DataInsercao) 

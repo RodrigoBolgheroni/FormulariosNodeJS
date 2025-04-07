@@ -193,8 +193,8 @@ router.get('/editarRegra/:idRegra', connectToDatabase, async (req, res) => {
                                     <div class="form-group">
                                       <label for="ativo">Ativo</label>
                                       <select class="form-control" id="ativo" name="ativo">
-                                        <option value="1" ${regra.Ativo === 1 ? 'selected' : ''}>Sim</option>
-                                        <option value="0" ${regra.Ativo === 0 ? 'selected' : ''}>Não</option>
+                                        <option value="1" ${regra.Ativo === true ? 'selected' : ''}>Sim</option>
+                                        <option value="0" ${regra.Ativo === false ? 'selected' : ''}>Não</option>
                                       </select>
                                     </div>
                                     <button type="submit" class="btn btn-primary">Salvar Regra</button>
@@ -301,16 +301,17 @@ router.get('/regrasarquivos', connectToDatabase, async (req, res) => {
     const request = new sql.Request();
     const query = `
       SELECT 
-        r.[IdCliente_Tipoarquivo_Regra],
+	      r.[IdCliente_Tipoarquivo_Regra],
         r.[IdCliente_TipoArquivo],
         r.[IdRegra],
         rg.[Regra],  -- Nome da regra, vindo da tabela tblregra
-        r.[TipoDeDado],
+        td.[TipoDeDado],
         r.[DescricaoCampo],
         r.[Obrigatorio],
         r.[DataInsercao],
         r.[DataAlteracao]
       FROM tblcliente_tipoarquivo_regra r
+	  INNER JOIN tbltipodedados td on r.IdTipoDeDado = td.IdTipoDeDados 
       LEFT JOIN tblregra rg ON r.[IdRegra] = rg.[IdRegra]
     `;
 
