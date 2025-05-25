@@ -8,7 +8,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="icon" type="image/png" sizes="16x16" href="/plugins/images/favicon.png">
-    <title>Ample Admin Template - The Ultimate Multipurpose admin template</title>
+    <title>Detalhes Cliente e Responsaveis - Arker Data Admin</title>
     <link href="bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.css" rel="stylesheet">
     <link href="/plugins/bower_components/toast-master/css/jquery.toast.css" rel="stylesheet">
@@ -22,46 +22,13 @@
     <link href="css/colors/gray-dark.css" id="theme" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        /* Keep existing styles */
         .filter-icon {
             cursor: pointer;
             margin-left: 5px;
         }
-
-        .search-input {
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            padding: 5px 10px;
-            padding-left: 30px;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="gray" class="bi bi-search" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>');
-            background-repeat: no-repeat;
-            background-position: 5px center;
-            background-size: 16px;
-            margin-left: 20px;
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .pagination li {
-            list-style: none;
-            margin: 0 5px;
-        }
-
-        .pagination a {
-            border: 1px solid #ccc;
-            padding: 5px 10px;
-            text-decoration: none;
-            color: #333;
-            border-radius: 4px;
-        }
-
-        .pagination .active a {
-            background-color: #007bff;
-            color: #fff;
-        }
+        /* Removed search-input styles as it's not needed */
+        /* Removed pagination styles as it's not needed for the top table */
     </style>
 
 </head>
@@ -90,9 +57,10 @@
         <div class="navbar-default sidebar" role="navigation">
             <div class="sidebar-nav slimscrollsidebar">
                 <div class="sidebar-head">
-                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu">Navigation</span></h3>
+                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu"></span></h3>
                 </div>
                 <ul class="nav" id="side-menu">
+                    <li><a href="/dash"><i class="mdi mdi-chart-bar"></i><span class="hide-menu"> Dashboard</span></a></li>
                     <li> <a class="waves-effect active"><i class="mdi mdi-table fa-fw"></i> <span class="hide-menu">Tabelas<span class="fa arrow"></span></span></a>
                         <ul class="nav nav-second-level">
                             <li><a href="/cliente"><i class="ti-user fa-fw"></i><span class="hide-menu">Cliente</span></a></li>
@@ -109,31 +77,62 @@
             <div class="container-fluid">
                 <div class="row bg-title">
                     <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
-                        <h4 class="page-title">Responsaveis</h4>
+                        <h4 class="page-title">Detalhes do Cliente</h4> <!-- Changed Page Title -->
                     </div>
                     <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
                         <ol class="breadcrumb">
-                            <li><a href="#">Tabelas</a></li>
-                            <li class="active">Responsaveis</li>
+                            <li><a href="/cliente">Clientes</a></li> <!-- Link back to client list -->
+                            <li class="active">Detalhes</li>
                         </ol>
                     </div>
                 </div>
                 <div class="row">
+                    <!-- Section for Specific Client Details -->
                     <div class="col-sm-12">
                         <div class="panel">
-                            <div class="panel-heading">
-                                <span id="tituloTabela">TABELA RESPONSAVEIS</span><span id="nomeCliente" style="margin-left: 10px; font-weight: bold;"></span>
-                                <a href="/cliente" class="btn btn-primary btn-sm pull-right" style="height: 30px;">
-                                    Ver Clientes
+                            <div class="panel-heading" style="display: flex;justify-content: space-between;">
+                                <div style="display: flex;">
+                                    <div class="search-container" id="clienteDetailHeading">
+                                        DETALHES DO CLIENTE
+                                    </div>
+                                </div>
+                                <!-- Optional: Button to go back -->
+                                <a href="/cliente" class="btn btn-default btn-sm pull-right" style="height: 30px;">
+                                    Voltar para Clientes
                                 </a>
                             </div>
-                            
                             <div class="table-responsive">
                                 <table class="table table-hover manage-u-table">
                                     <thead>
                                         <tr>
                                             <th>Id</th>
-                                            <th>Id Do Cliente</th>
+                                            <th>Nome</th>
+                                            <th>Ativo</th>
+                                            <th>Gerenciar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="clienteDetailTable">
+                                        <!-- Specific client details will be loaded here -->
+                                    </tbody>
+                                </table>
+                                <!-- Removed pagination for the top table -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section for Responsibles -->
+                    <div class="col-sm-12">
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <span id="tituloTabela">TABELA RESPONSAVEIS</span><span id="nomeCliente" style="margin-left: 10px; font-weight: bold;"></span>
+                                <!-- Removed the "Ver Clientes" button from here as it's redundant -->
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover manage-u-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Id Responsável</th>
+                                            <th>Id Cliente</th>
                                             <th>Nome</th>
                                             <th>Email</th>
                                             <th>Ativo</th>
@@ -141,6 +140,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="responsaveisTable">
+                                        <!-- Responsibles will be loaded here -->
                                     </tbody>
                                 </table>
                             </div>
@@ -169,21 +169,82 @@
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <script>
+        // --- Helper Function ---
+        function getClienteIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('clienteId');
+        }
+
+        // --- Function to display the specific client's details ---
+        function exibirDetalhesCliente(cliente) {
+            const tableBody = document.getElementById('clienteDetailTable');
+            tableBody.innerHTML = ''; // Clear previous content
+
+            if (!cliente) {
+                tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Cliente não encontrado.</td></tr>';
+                document.getElementById('clienteDetailHeading').textContent = 'DETALHES DO CLIENTE - Não encontrado';
+                return;
+            }
+
+            const ativo = cliente.Ativo === true ? 'Sim' : 'Não';
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><span class="font-medium">${cliente.IdCliente}</span></td>
+                <td><span class="font-medium">${cliente.Cliente}</span></td>
+                <td>${ativo}</td>
+                <td>
+                    <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="editClient('${cliente.IdCliente}')" title="Editar Cliente">
+                        <i class="ti-pencil-alt"></i>
+                    </button>
+                    <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="deactivateClient('${cliente.IdCliente}')" title="Desativar Cliente">
+                        <i class="icon-trash"></i>
+                    </button>
+                    <!-- Removed the search button (ti-search) as it's not needed here -->
+                </td>
+            `;
+            tableBody.appendChild(row);
+
+            // Update the panel heading for the client details section
+            document.getElementById('clienteDetailHeading').textContent = `DETALHES DO CLIENTE: ${cliente.Cliente}`;
+            // Update the heading for the responsibles table as well
+            document.getElementById('nomeCliente').textContent = `- ${cliente.Cliente}`;
+        }
+
+
+        // --- Function to fetch and display responsibles ---
         async function buscarResponsaveis(clienteId) {
             const loadingScreen = document.getElementById('loadingScreen');
-            loadingScreen.style.display = 'flex';
+            loadingScreen.style.display = 'flex'; // Show loading only when fetching responsibles
 
             try {
                 const response = await fetch(`/responsaveis?clienteId=${clienteId}`);
+                 if (!response.ok) {
+                    throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                 }
                 const responsaveis = await response.json();
 
                 const tableBody = document.getElementById('responsaveisTable');
-                tableBody.innerHTML = '';
+                tableBody.innerHTML = ''; // Clear previous content
+
+                if (responsaveis.length === 0) {
+                     tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Nenhum responsável encontrado para este cliente.</td></tr>';
+                     // Keep client name in heading even if no responsibles
+                     if (responsaveis.length > 0 && responsaveis[0].NomeCliente) { // Check if NomeCliente exists
+                         document.getElementById('nomeCliente').textContent = `- ${responsaveis[0].NomeCliente}`;
+                     }
+                     return; // Exit function early
+                }
+
 
                 const fragment = document.createDocumentFragment();
 
                 responsaveis.forEach(responsavel => {
-                    document.getElementById('nomeCliente').textContent = `- ${responsavel.NomeCliente}`;
+                    // Update client name from the first responsible (if not already set by exibirDetalhesCliente)
+                    if (!document.getElementById('nomeCliente').textContent && responsavel.NomeCliente) {
+                         document.getElementById('nomeCliente').textContent = `- ${responsavel.NomeCliente}`;
+                    }
+
                     const ativo = responsavel.Ativo === true ? 'Sim' : 'Não';
 
                     const row = document.createElement('tr');
@@ -194,10 +255,7 @@
                         <td><span class="font-medium">${responsavel.Email}</span></td>
                         <td>${ativo}</td>
                         <td>
-                            <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="editClient('${responsavel.IdCliente}')">
-                                <i class="ti-pencil-alt"></i>
-                            </button>
-                            <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="deactivateResponsavel('${responsavel.IdResponsavel}')">
+                            <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="deactivateResponsavel('${responsavel.IdResponsavel}')" title="Excluir Responsável">
                                 <i class="icon-trash"></i>
                             </button>
                         </td>
@@ -207,70 +265,162 @@
 
                 tableBody.appendChild(fragment);
 
-                // Atualiza o título da tabela com o nome do cliente
-
             } catch (error) {
-                console.error('Erro ao buscar clientes:', error);
+                console.error('Erro ao buscar responsáveis:', error);
+                document.getElementById('responsaveisTable').innerHTML = `<tr><td colspan="6" class="text-center text-danger">Erro ao carregar responsáveis: ${error.message}</td></tr>`;
             } finally {
-                loadingScreen.style.display = 'none';
+                loadingScreen.style.display = 'none'; // Hide loading after fetching responsibles
             }
         }
-        function editClient(clientName) {
-            window.location.href = `/editarCliente/${clientName}`;
-        }
-        async function deactivateResponsavel(idResponsavel) {
-    try {
-        // Exibe o alerta de confirmação
-        const result = await Swal.fire({
-            title: 'Tem certeza?',
-            text: "Você não poderá reverter essa ação!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Sim, deletar!',
-            cancelButtonText: 'Cancelar'
-        });
 
-        // Se o usuário confirmar, realiza a desativação
-        if (result.isConfirmed) {
-            const response = await fetch(`/responsavel/${idResponsavel}`, {
-                method: 'DELETE',
-            });
-            
-            // Verifica se a resposta foi bem sucedida
-            if (response.ok) {
-                const data = await response.json();
-                window.location.reload();
-            } else {
-                // Se a resposta não foi ok, mostra a mensagem de erro
-                const errorData = await response.json();
-                await Swal.fire(
+        // --- Function to load all page data (Client + Responsibles) ---
+        async function carregarDadosPagina(clienteId) {
+            const loadingScreen = document.getElementById('loadingScreen');
+            loadingScreen.style.display = 'flex'; // Show loading initially
+
+            let clienteEspecifico = null;
+
+            try {
+                // 1. Fetch all clients to find the specific one
+                //    Alternatively, if you have an endpoint like /cliente/:id, use that instead for efficiency.
+                const responseClientes = await fetch('/clientes');
+                if (!responseClientes.ok) throw new Error('Falha ao buscar lista de clientes');
+                const todosClientes = await responseClientes.json();
+
+                // Find the specific client (use == for potential type difference from URL param)
+                clienteEspecifico = todosClientes.find(c => c.IdCliente == clienteId);
+
+                // 2. Display the specific client's details
+                exibirDetalhesCliente(clienteEspecifico);
+
+                // 3. Fetch and display responsibles (only if client was found)
+                if (clienteEspecifico) {
+                    await buscarResponsaveis(clienteId);
+                } else {
+                    // If client not found, clear responsible table and show message
+                     document.getElementById('responsaveisTable').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Cliente não encontrado, não é possível carregar responsáveis.</td></tr>';
+                     loadingScreen.style.display = 'none'; // Hide loading if client not found early
+                }
+
+            } catch (error) {
+                exibirDetalhesCliente(null); // Show client not found in the top table
+                document.getElementById('responsaveisTable').innerHTML = `<tr><td colspan="6" class="text-center text-danger">Erro ao carregar dados: ${error.message}</td></tr>`;
+                loadingScreen.style.display = 'none'; // Hide loading on error
+            }
+            // Note: buscarResponsaveis handles its own loading screen hiding
+        }
+
+
+        // --- Action Functions ---
+        function editClient(clienteId) {
+            window.location.href = `/editarCliente/${clienteId}`;
+        }
+
+
+
+        async function deactivateClient(clienteId) {
+             // This function might need adjustment. Deactivating a client
+             // when viewing their details might redirect the user away.
+             try {
+                 const result = await Swal.fire({
+                     title: 'Tem certeza?',
+                     text: "Desativar este cliente também pode afetar seus responsáveis e arquivos associados.",
+                     icon: 'warning',
+                     showCancelButton: true,
+                     confirmButtonColor: '#d33', // Red for delete/deactivate
+                     cancelButtonColor: '#3085d6',
+                     confirmButtonText: 'Sim, desativar!',
+                     cancelButtonText: 'Cancelar'
+                 });
+
+                 if (result.isConfirmed) {
+                     const response = await fetch(`/desativarCliente/${clienteId}`, {
+                         method: 'PATCH',
+                     });
+                     if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Falha ao desativar cliente');
+                     }
+                     // On success, redirect back to the main client list
+                     await Swal.fire(
+                         'Desativado!',
+                         'O cliente foi desativado.',
+                         'success'
+                     );
+                     window.location.href = '/cliente';
+                 }
+             } catch (error) {
+                 console.error('Erro ao desativar cliente:', error);
+                 Swal.fire(
+                     'Erro!',
+                     `Ocorreu um erro: ${error.message}`,
+                     'error'
+                 );
+             }
+         }
+
+
+        async function deactivateResponsavel(idResponsavel) {
+            try {
+                const result = await Swal.fire({
+                    title: 'Tem certeza?',
+                    text: "Você não poderá reverter essa ação!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33', // Red for delete
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sim, excluir!',
+                    cancelButtonText: 'Cancelar'
+                });
+
+                if (result.isConfirmed) {
+                    const response = await fetch(`/responsavel/${idResponsavel}`, {
+                        method: 'DELETE', // Use DELETE for permanent removal
+                    });
+
+                    if (response.ok) {
+                        await Swal.fire(
+                            'Excluído!',
+                            'O responsável foi excluído.',
+                            'success'
+                        );
+                        // Reload the responsibles section or the whole page
+                        const clienteId = getClienteIdFromUrl();
+                        if(clienteId) {
+                            buscarResponsaveis(clienteId); // Reload only the responsibles table
+                        } else {
+                            window.location.reload(); // Fallback to full reload if ID is lost
+                        }
+                    } else {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Não foi possível excluir o responsável');
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao excluir responsável:', error);
+                Swal.fire(
                     'Erro!',
-                    errorData.message || 'Não foi possível deletar o responsável',
+                    `Ocorreu um erro inesperado: ${error.message}`,
                     'error'
                 );
             }
         }
-    } catch (error) {
-        console.error('Erro ao desativar responsavel:', error);
-        Swal.fire(
-            'Erro!',
-            'Ocorreu um erro inesperado ao conectar com o servidor.',
-            'error'
-        );
-    }
-}
 
-        function getClienteIdFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('clienteId');
-        }
 
+        // --- Initial Load ---
         window.onload = function () {
             const clienteId = getClienteIdFromUrl();
             if (clienteId) {
-                buscarResponsaveis(clienteId);
+                carregarDadosPagina(clienteId);
+            } else {
+                // Handle missing clienteId - redirect or show clear error
+                console.error("ID do Cliente não encontrado na URL.");
+                document.getElementById('loadingScreen').style.display = 'none'; // Hide loading
+                exibirDetalhesCliente(null); // Show client not found
+                document.getElementById('responsaveisTable').innerHTML = '<tr><td colspan="6" class="text-center text-danger">ID do Cliente não especificado na URL.</td></tr>';
+                alert("ID do Cliente não especificado. Retornando à lista de clientes.");
+                // Redirect back to the client list page
+                // window.location.href = '/cliente';
             }
         };
     </script>

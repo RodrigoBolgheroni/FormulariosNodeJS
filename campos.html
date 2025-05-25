@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" type="image/png" sizes="16x16" href="/plugins/images/favicon.png">
+    <title>Detalhes do Arquivo e Campos - FormArker</title> <!-- Changed Title -->
+    <!-- Bootstrap Core CSS -->
+    <link href="bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Menu CSS -->
+    <link href="/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.css" rel="stylesheet">
+    <!-- toast CSS -->
+    <link href="/plugins/bower_components/toast-master/css/jquery.toast.css" rel="stylesheet">
+    <!-- morris CSS -->
+    <link href="/plugins/bower_components/morrisjs/morris.css" rel="stylesheet">
+    <!-- chartist CSS -->
+    <link href="/plugins/bower_components/chartist-js/dist/chartist.min.css" rel="stylesheet">
+    <link href="/plugins/bower_components/chartist-plugin-tooltip-master/dist/chartist-plugin-tooltip.css" rel="stylesheet">
+    <!-- Calendar CSS -->
+    <link href="/plugins/bower_components/calendar/dist/fullcalendar.css" rel="stylesheet" />
+    <!-- animation CSS -->
+    <link href="css/animate.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/edit.css" rel="stylesheet">
+    <!-- color CSS -->
+    <link href="css/colors/gray-dark.css" id="theme" rel="stylesheet">
+</head>
+
+<body class="fix-header">
+        <!-- Tela de carregamento -->
+        <div class="loading-screen" id="loadingScreen">
+            <div class="loading-spinner"></div>
+        </div>
+    <!-- ============================================================== -->
+    <!-- Wrapper -->
+    <!-- ============================================================== -->
+    <div id="wrapper">
+        <!-- ============================================================== -->
+        <!-- Topbar header -->
+        <!-- ============================================================== -->
+        <nav class="navbar navbar-default navbar-static-top m-b-0">
+            <div class="navbar-header">
+                <div class="top-left-part">
+                    <a class="logo" href="index.html">
+                        <span class="hidden-xs">
+                            <img src="/plugins/images/logo.webp" alt="home" class="dark-logo"  width="200px">
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ============================================================== -->
+        <!-- Left Sidebar -->
+        <!-- ============================================================== -->
+        <div class="navbar-default sidebar" role="navigation">
+            <div class="sidebar-nav slimscrollsidebar">
+                <div class="sidebar-head">
+                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu">Navigation</span></h3>
+                </div>
+                 <ul class="nav" id="side-menu">
+                     <li><a href="/dash"><i class="mdi mdi-chart-bar "></i><span class="hide-menu"> Dashboard</span></a></li>
+                    <li> <a class="waves-effect active"><i class="mdi mdi-table fa-fw"></i> <span class="hide-menu">Tabelas<span class="fa arrow"></span></span></a>
+                        <ul class="nav nav-second-level">
+                            <li><a href="/cliente"><i class="ti-user fa-fw"></i><span class="hide-menu">Cliente</span></a></li>
+                            <li><a href="/tipoarquivo"><i class="ti-files fa-fw"></i><span class="hide-menu">Tipo Arquivo</span></a></li>
+                            <li><a href="/extensao"><i class="ti-file fa-fw"></i><span class="hide-menu">Extensão</span></a></li>
+                            <li><a href="/regra"><i class="ti-key fa-fw"></i><span class="hide-menu">Regra</span></a></li>
+                            <li><a href="/arquivo"><i class="ti-file fa-fw"></i><span class="hide-menu">Arquivo</span></a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- Page Content -->
+        <!-- ============================================================== -->
+        <div id="page-wrapper">
+            <div class="container-fluid">
+                <div class="row bg-title">
+                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                        <h4 class="page-title">Detalhes do Arquivo</h4> <!-- Changed Title -->
+                    </div>
+                    <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
+                        <ol class="breadcrumb">
+                            <li><a href="/arquivo">Arquivos</a></li> <!-- Link back to list -->
+                            <li class="active">Detalhes</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- ============================================================== -->
+                <!-- Detalhes do Arquivo -->
+                <!-- ============================================================== -->
+                 <div class="row">
+                    <div class="col-sm-12">
+                        <div class="panel">
+                            <div class="panel-heading" style="display: flex; justify-content: space-between; align-items: center;">
+                                <span id="arquivoDetailHeading">DETALHES DO ARQUIVO</span>
+                                <a href="/arquivo" class="btn btn-default btn-sm pull-right" style="height: 30px;">
+                                    Voltar para Arquivos
+                                </a>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover manage-u-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Id</th>
+                                            <th>Cliente</th>
+                                            <th>Tipo Arquivo</th>
+                                            <th>Extensão</th>
+                                            <th>Encoding</th>
+                                            <th>IsHeader</th>
+                                            <th>Header</th>
+                                            <th>Chave</th>
+                                            <th>Data</th>
+                                            <th>Ativo</th>
+                                            <th>Gerenciar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="arquivoDetailTable">
+                                        <!-- Specific file details will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================== -->
+                <!-- Tabela Regras do Arquivo -->
+                <!-- ============================================================== -->
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="panel">
+                            <div class="panel-heading">
+                                CAMPOS / REGRAS DO ARQUIVO <span id="nomeArquivoRegra" style="font-weight: bold;"></span>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover manage-u-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Id Arquivo</th>
+                                            <th>Campo</th> 
+                                            <th>Tipo De Dado</th>
+                                            <th>Regra</th>
+                                            <th>Obrigatório</th>
+                                            <th>Formato</th> 
+                                            <th>Data</th> 
+                                            <!-- Removed Gerenciar column for rules, assuming rules are managed via file edit -->
+                                        </tr>
+                                    </thead>
+                                    <tbody id="regraarquivoTable">
+                                        <!-- Carrega as regras aqui -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="footer text-center"> 2025 &copy; Arker - arker.com.br </footer> 
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- All Jquery -->
+    <!-- ============================================================== -->
+    <script src="/plugins/bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.js"></script>
+    <script src="js/jquery.slimscroll.js"></script>
+    <script src="js/waves.js"></script>
+    <script src="/plugins/bower_components/waypoints/lib/jquery.waypoints.js"></script>
+    <script src="/plugins/bower_components/counterup/jquery.counterup.min.js"></script>
+    <script src="/plugins/bower_components/chartist-js/dist/chartist.min.js"></script>
+    <script src="/plugins/bower_components/chartist-plugin-tooltip-master/dist/chartist-plugin-tooltip.min.js"></script>
+    <script src="/plugins/bower_components/moment/moment.js"></script>
+    <script src='/plugins/bower_components/calendar/dist/fullcalendar.min.js'></script>
+    <script src="/plugins/bower_components/calendar/dist/cal-init.js"></script>
+    <script src="js/custom.min.js"></script>
+    <script src="/plugins/bower_components/toast-master/js/jquery.toast.js"></script>
+    <script src="/plugins/bower_components/styleswitcher/jQuery.style.switcher.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+    <script>
+        // --- Helper Function ---
+        function getArquivoIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('arquivoId'); // Get ID from URL parameter
+        }
+
+        // --- Function to display the specific file's details ---
+        function exibirDetalhesArquivo(arquivo) {
+            const tableBody = document.getElementById('arquivoDetailTable');
+            tableBody.innerHTML = ''; // Clear previous content
+            const heading = document.getElementById('arquivoDetailHeading');
+            const regraHeading = document.getElementById('nomeArquivoRegra');
+
+
+            if (!arquivo) {
+                tableBody.innerHTML = '<tr><td colspan="11" class="text-center text-danger">Arquivo não encontrado.</td></tr>'; // Updated colspan
+                heading.textContent = 'DETALHES DO ARQUIVO - Não encontrado';
+                regraHeading.textContent = '';
+                return;
+            }
+
+            const ativo = arquivo.Ativo === true ? 'Sim' : 'Não';
+            const isHeader = arquivo.IsHeader === true ? 'Sim' : 'Não';
+            const headerFormatted = arquivo.Header ? arquivo.Header.split(',').join('<br>') : '';
+            const nomeCampoData = arquivo.NomeCampoData || '-'; 
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><span class="font-medium">${arquivo.IdCliente_TipoArquivo}</span></td>
+                <td><span class="font-medium">${arquivo.Cliente}</span></td>
+                <td><span class="font-medium">${arquivo.TipoArquivo}</span></td>
+                <td><span class="font-medium">${arquivo.ExtensaoArquivo}</span></td>
+                <td><span class="font-medium">${arquivo.Encoding}</span></td>
+                <td><span class="font-medium">${isHeader}</span></td>
+                <td><span class="font-medium">${headerFormatted}</span></td>
+                <td><span class="font-medium">${arquivo.Chave}</span></td>
+                <td><span class="font-medium">${nomeCampoData}</span></td> <!-- Display the name of the date field -->
+                <td>${ativo}</td>
+                <td>
+                    <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="editArquivo('${arquivo.IdCliente_TipoArquivo}')" title="Editar Arquivo">
+                        <i class="ti-pencil-alt"></i>
+                    </button>
+                    <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="deactivateArquivo('${arquivo.IdCliente_TipoArquivo}')" title="Desativar Arquivo">
+                        <i class="icon-trash"></i>
+                    </button>
+                    <!-- Removed search button -->
+                </td>
+            `;
+            tableBody.appendChild(row);
+
+            heading.textContent = `DETALHES DO ARQUIVO: ${arquivo.Cliente} - ${arquivo.TipoArquivo}`;
+            regraHeading.textContent = `- ${arquivo.Cliente} / ${arquivo.TipoArquivo}`;
+        }
+
+
+        async function buscarRegrasArquivo(arquivoId, arquivoEspecifico) {
+            const loadingScreen = document.getElementById('loadingScreen');
+
+            try {
+                const response = await fetch('/regrasarquivos'); 
+                 if (!response.ok) {
+                    throw new Error(`Erro ao buscar regras: ${response.statusText}`);
+                 }
+                const todasRegras = await response.json();
+
+                const regrasEspecificas = todasRegras.filter(regra => {
+                    return String(regra.IdCliente_TipoArquivo) === String(arquivoId);
+                });
+
+                const tableBody = document.getElementById('regraarquivoTable');
+                tableBody.innerHTML = ''; 
+
+                if (regrasEspecificas.length === 0) {
+                     tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhuma regra/campo encontrado para este arquivo.</td></tr>'; 
+                     return;
+                }
+
+                const fragment = document.createDocumentFragment();
+
+                regrasEspecificas.forEach(regra => {
+                    const obrigatorio = regra.Obrigatorio === true ? 'Sim' : 'Não';
+
+                    let isCampoData = 'Não'; 
+                    if (arquivoEspecifico && arquivoEspecifico.NomeCampoData && regra.DescricaoCampo === arquivoEspecifico.NomeCampoData) {
+                        isCampoData = 'Sim';
+                    }
+
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><span class="font-medium">${regra.IdCliente_TipoArquivo}</span></td>
+                        <td><span class="font-medium">${regra.DescricaoCampo}</span></td>
+                        <td><span class="font-medium">${regra.TipoDeDado}</span></td>
+                        <td><span class="font-medium">${regra.Regra}</span></td>
+                        <td>${obrigatorio}</td>
+                        <td><span class="font-medium">${regra.Formato || '-'}</span></td>
+                        <td>${isCampoData}</td> <!-- Use the NEW isCampoData variable -->
+                    `;
+                    fragment.appendChild(row);
+                });
+
+                tableBody.appendChild(fragment);
+
+            } catch (error) {
+                console.error('Erro ao buscar regras do arquivo:', error);
+                document.getElementById('regraarquivoTable').innerHTML = `<tr><td colspan="7" class="text-center text-danger">Erro ao carregar regras: ${error.message}</td></tr>`; 
+            } finally {
+            }
+        }
+
+
+        async function carregarDadosPagina(arquivoId) {
+            const loadingScreen = document.getElementById('loadingScreen');
+            loadingScreen.style.display = 'flex'; 
+
+            let arquivoEspecifico = null;
+
+            try {
+
+                const responseArquivos = await fetch('/arquivos');
+                if (!responseArquivos.ok) throw new Error('Falha ao buscar lista de arquivos');
+                const todosArquivos = await responseArquivos.json();
+
+
+                arquivoEspecifico = todosArquivos.find(a => String(a.IdCliente_TipoArquivo) === String(arquivoId));
+
+
+                exibirDetalhesArquivo(arquivoEspecifico); 
+
+
+                if (arquivoEspecifico) {
+
+                    await buscarRegrasArquivo(arquivoId, arquivoEspecifico);
+                } else {
+
+                     document.getElementById('regraarquivoTable').innerHTML = '<tr><td colspan="7" class="text-center text-danger">Arquivo não encontrado, não é possível carregar regras.</td></tr>'; 
+                }
+
+            } catch (error) {
+                console.error("Erro ao carregar dados da página:", error);
+                exibirDetalhesArquivo(null); 
+                document.getElementById('regraarquivoTable').innerHTML = `<tr><td colspan="7" class="text-center text-danger">Erro ao carregar dados: ${error.message}</td></tr>`; 
+            } finally {
+                 loadingScreen.style.display = 'none'; 
+            }
+        }
+
+
+        // --- Action Functions ---
+        function editArquivo(arquivoId) {
+            window.location.href = `/editarArquivo/${arquivoId}`;
+        }
+
+        async function deactivateArquivo(arquivoId) {
+
+             try {
+                 const result = await Swal.fire({
+                     title: 'Tem certeza?',
+                     text: "Desativar este arquivo também desativará suas regras associadas.",
+                     icon: 'warning',
+                     showCancelButton: true,
+                     confirmButtonColor: '#d33', 
+                     cancelButtonColor: '#3085d6',
+                     confirmButtonText: 'Sim, desativar!',
+                     cancelButtonText: 'Cancelar'
+                 });
+
+                 if (result.isConfirmed) {
+                     const response = await fetch(`/desativarArquivo/${arquivoId}`, {
+                         method: 'PATCH', 
+                     });
+                     if (!response.ok) {
+                        let errorMsg = 'Falha ao desativar arquivo.';
+                        try {
+                            const errorData = await response.json();
+                            errorMsg = errorData.message || errorMsg;
+                        } catch(e) { }
+                        throw new Error(errorMsg);
+                     }
+
+                     await Swal.fire(
+                         'Desativado!',
+                         'O arquivo foi desativado.',
+                         'success'
+                     );
+                     window.location.href = '/arquivo'; 
+                 }
+             } catch (error) {
+                 console.error('Erro ao desativar arquivo:', error);
+                 Swal.fire(
+                     'Erro!',
+                     `Ocorreu um erro: ${error.message}`,
+                     'error'
+                 );
+             }
+         }
+
+        // --- Initial Load ---
+        window.onload = function () {
+            const arquivoId = getArquivoIdFromUrl();
+            if (arquivoId) {
+                carregarDadosPagina(arquivoId);
+            } else {
+
+                console.error("ID do Arquivo não encontrado na URL.");
+                document.getElementById('loadingScreen').style.display = 'none'; 
+                exibirDetalhesArquivo(null); 
+                document.getElementById('regraarquivoTable').innerHTML = '<tr><td colspan="7" class="text-center text-danger">ID do Arquivo não especificado na URL.</td></tr>'; // 
+            }
+        };
+    </script>
+
+</body>
+</html>

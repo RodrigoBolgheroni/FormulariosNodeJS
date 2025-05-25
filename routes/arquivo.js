@@ -7,45 +7,59 @@ const router = express.Router();
 // Middleware para conectar e desconectar do banco de dados
 const connectToDatabase = async (req, res, next) => {
   try {
-    await sql.connect(config);
+    // Garante que não haja conexões abertas antes de criar uma nova
+    if (sql.pool && sql.pool.connected) {
+        console.log("Fechando conexão existente antes de abrir nova.");
+        await sql.pool.close();
+    }
+    req.db = await sql.connect(config); // Armazena a conexão no request
+    console.log("Conexão estabelecida para a requisição.");
     next();
   } catch (err) {
     console.error('Erro ao conectar ao banco de dados:', err.message);
-    res.status(500).send('Erro no servidor');
+    // Tenta fechar se a conexão foi parcialmente estabelecida
+    if (sql.pool && sql.pool.connecting) {
+        try { await sql.pool.close(); } catch (closeErr) { console.error("Erro ao fechar pool durante erro de conexão:", closeErr); }
+    }
+    res.status(500).send('Erro no servidor ao conectar ao banco.');
   }
 };
 
-const closeConnection = async () => {
+const closeConnection = async (req, res) => { // Modificado para aceitar req, res
   try {
-    if (sql.connected) {
-      await sql.close();
+    if (req.db && req.db.connected) {
+      await req.db.close();
+      console.log("Conexão fechada após a requisição.");
+    } else {
+      console.log("Nenhuma conexão ativa para fechar ou já fechada.");
     }
   } catch (err) {
     console.error('Erro ao fechar conexão com o banco de dados:', err.message);
   }
 };
 
-// Rota para buscar dados do arquivo
+// --- Rota GET /arquivos (sem alterações) ---
 router.get('/arquivos', connectToDatabase, async (req, res) => {
   try {
-    const request = new sql.Request();
+    const request = new sql.Request(req.db); // Usa a conexão do request
     const query = `
-      SELECT 
+      SELECT
         cta.[IdCliente_TipoArquivo],
-        c.[IdCliente],  
-        c.[Cliente], 
-        ta.[IdTipoArquivo], 
-        ta.[TipoArquivo], 
-        ea.[IdExtensaoArquivo], 
-        ea.[ExtensaoArquivo], 
-        cta.[Encoding], 
-        cta.[IsHeader], 
-        cta.[Header], 
-        cta.[Chave], 
-        cta.[Ativo] 
-      FROM tblcliente_tipoarquivo cta 
-      LEFT JOIN tblcliente c ON cta.[IdCliente] = c.[IdCliente] 
-      LEFT JOIN tbltipoarquivo ta ON cta.[IdTipoArquivo] = ta.[IdTipoArquivo] 
+        c.[IdCliente],
+        c.[Cliente],
+        ta.[IdTipoArquivo],
+        ta.[TipoArquivo],
+        ea.[IdExtensaoArquivo],
+        ea.[ExtensaoArquivo],
+        cta.[Encoding],
+        cta.[IsHeader],
+        cta.[Header],
+        cta.[Chave],
+        cta.[Ativo],
+        cta.[NomeCampoData] -- Adicionado para exibição se necessário
+      FROM tblcliente_tipoarquivo cta
+      LEFT JOIN tblcliente c ON cta.[IdCliente] = c.[IdCliente]
+      LEFT JOIN tbltipoarquivo ta ON cta.[IdTipoArquivo] = ta.[IdTipoArquivo]
       LEFT JOIN tblextensaoarquivo ea ON cta.[IdExtensaoArquivo] = ea.[IdExtensaoArquivo];
     `;
     const result = await request.query(query);
@@ -54,117 +68,105 @@ router.get('/arquivos', connectToDatabase, async (req, res) => {
     console.error('Erro ao buscar arquivos:', err.message);
     res.status(500).send('Erro ao buscar arquivos');
   } finally {
-    await closeConnection();
+    await closeConnection(req, res); // Passa req, res
   }
 });
 
-// Rota para desativar um arquivo
+// --- Rota PATCH /desativarArquivo/:idArquivo (sem alterações na lógica principal) ---
 router.patch('/desativarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
   const { idArquivo } = req.params;
+  const transaction = new sql.Transaction(req.db); // Usa a conexão do request
 
   try {
-    const transaction = new sql.Transaction();
     await transaction.begin();
 
-    try {
-      const request = new sql.Request(transaction);
+    // 1. Deletar as regras associadas ao arquivo
+    const requestRegras = new sql.Request(transaction);
+    const deleteRegrasQuery = `
+      DELETE FROM tblcliente_tipoarquivo_regra
+      WHERE IdCliente_TipoArquivo = @idArquivo
+    `;
+    requestRegras.input('idArquivo', sql.Int, idArquivo);
+    await requestRegras.query(deleteRegrasQuery);
 
-      // 1. Deletar as regras associadas ao arquivo
-      const deleteRegrasQuery = `
-        DELETE FROM tblcliente_tipoarquivo_regra
-        WHERE IdCliente_TipoArquivo = @idArquivo
-      `;
-      request.input('idArquivo', sql.Int, idArquivo);
-      await request.query(deleteRegrasQuery);
+    // 2. Deletar o arquivo
+    const requestArquivo = new sql.Request(transaction);
+    const deleteArquivoQuery = `
+      DELETE FROM tblcliente_tipoarquivo
+      WHERE IdCliente_TipoArquivo = @idArquivo
+    `;
+    requestArquivo.input('idArquivo', sql.Int, idArquivo);
+    await requestArquivo.query(deleteArquivoQuery);
 
-      // 2. Deletar o arquivo
-      const deleteArquivoQuery = `
-        DELETE FROM tblcliente_tipoarquivo
-        WHERE IdCliente_TipoArquivo = @idArquivo
-      `;
-      await request.query(deleteArquivoQuery);
-
-      await transaction.commit(); // Confirma a transação
-      res.status(200).json({ message: 'Arquivo desativado com sucesso' });
-    } catch (error) {
-      await transaction.rollback(); // Reverte a transação em caso de erro
-      throw error;
-    }
+    await transaction.commit(); // Confirma a transação
+    res.status(200).json({ message: 'Arquivo e suas regras deletados com sucesso' });
   } catch (err) {
-    console.error('Erro ao desativar arquivo:', err.message);
-    res.status(500).send('Erro ao desativar arquivo');
+    console.error('Erro ao deletar arquivo:', err.message);
+    if (transaction._active) { // Verifica se a transação está ativa antes do rollback
+        await transaction.rollback(); // Reverte a transação em caso de erro
+    }
+    res.status(500).send('Erro ao deletar arquivo');
   } finally {
-    await closeConnection();
+    await closeConnection(req, res); // Passa req, res
   }
 });
 
 
-
-// Rota para exibir a página de edição do arquivo
+// --- Rota GET /editarArquivo/:idArquivo (HTML e JS Atualizados) ---
 router.get('/editarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
   const { idArquivo } = req.params;
 
   try {
-    const request = new sql.Request();
+    const request = new sql.Request(req.db); // Usa a conexão do request
+    request.input('idArquivo', sql.Int, idArquivo);
 
     // Busca os dados do arquivo
     const arquivoQuery = `
-      SELECT 
-        cta.[IdCliente_TipoArquivo],
-        c.[IdCliente],  
-        c.[Cliente], 
-        ta.[IdTipoArquivo], 
-        ta.[TipoArquivo], 
-        ea.[IdExtensaoArquivo], 
-        ea.[ExtensaoArquivo], 
-        cta.[Encoding], 
-        cta.[IsHeader], 
-        cta.[Header], 
-        cta.[Chave], 
-        cta.[Ativo] 
-      FROM tblcliente_tipoarquivo cta 
-      LEFT JOIN tblcliente c ON cta.[IdCliente] = c.[IdCliente] 
-      LEFT JOIN tbltipoarquivo ta ON cta.[IdTipoArquivo] = ta.[IdTipoArquivo] 
+      SELECT
+        cta.[IdCliente_TipoArquivo], c.[IdCliente], c.[Cliente],
+        ta.[IdTipoArquivo], ta.[TipoArquivo], ea.[IdExtensaoArquivo],
+        ea.[ExtensaoArquivo], cta.[Encoding], cta.[IsHeader], cta.[Header],
+        cta.[Chave], cta.[Ativo], cta.[NomeCampoData]
+      FROM tblcliente_tipoarquivo cta
+      LEFT JOIN tblcliente c ON cta.[IdCliente] = c.[IdCliente]
+      LEFT JOIN tbltipoarquivo ta ON cta.[IdTipoArquivo] = ta.[IdTipoArquivo]
       LEFT JOIN tblextensaoarquivo ea ON cta.[IdExtensaoArquivo] = ea.[IdExtensaoArquivo]
       WHERE cta.[IdCliente_TipoArquivo] = @idArquivo
     `;
-    request.input('idArquivo', sql.Int, idArquivo);
     const arquivoResult = await request.query(arquivoQuery);
 
     if (arquivoResult.recordset.length === 0) {
       return res.status(404).send('Arquivo não encontrado');
     }
-
     const arquivo = arquivoResult.recordset[0];
 
     // Busca as regras associadas ao arquivo
     const regrasQuery = `
-      SELECT 
-        IdRegra, 
-        IdTipoDeDado, 
-        DescricaoCampo, 
-        Obrigatorio 
-      FROM tblcliente_tipoarquivo_regra 
+      SELECT
+        IdRegra, IdTipoDeDado, Formato, DescricaoCampo, Obrigatorio
+      FROM tblcliente_tipoarquivo_regra
       WHERE IdCliente_TipoArquivo = @idArquivo
     `;
     const regrasResult = await request.query(regrasQuery);
-    const regras = regrasResult.recordset;
-    console.log('Regras para renderização:', regras);
+    const regrasDb = regrasResult.recordset; // Renomeado para evitar conflito
 
-    // Busca clientes, tipos de arquivo e extensões ativos
+    // Busca clientes, tipos de arquivo, extensões e TIPOS DE DADOS ativos
     const clientesQuery = "SELECT IdCliente, Cliente FROM tblcliente WHERE Ativo = 1";
     const tiposArquivoQuery = "SELECT IdTipoArquivo, TipoArquivo FROM tbltipoarquivo WHERE Ativo = 1";
     const extensoesQuery = "SELECT IdExtensaoArquivo, ExtensaoArquivo FROM tblextensaoarquivo WHERE Ativo = 1";
+    const tiposDadosQuery = "SELECT IdTipoDeDados, TipoDeDado FROM tbltipodedados WHERE Ativo = 1"; // Busca os tipos de dados
 
-    const [clientesResult, tiposArquivoResult, extensoesResult] = await Promise.all([
+    const [clientesResult, tiposArquivoResult, extensoesResult, tiposDadosResult] = await Promise.all([
       request.query(clientesQuery),
       request.query(tiposArquivoQuery),
-      request.query(extensoesQuery)
+      request.query(extensoesQuery),
+      request.query(tiposDadosQuery) // Executa a query de tipos de dados
     ]);
 
     const clientes = clientesResult.recordset;
     const tiposArquivo = tiposArquivoResult.recordset;
     const extensoes = extensoesResult.recordset;
+    const tiposDados = tiposDadosResult.recordset; // Armazena os tipos de dados
 
     // Renderiza a página de edição
     res.send(`
@@ -174,130 +176,149 @@ router.get('/editarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="">
-        <meta name="author" content="">
         <link rel="icon" type="image/png" sizes="16x16" href="../plugins/images/favicon.png">
-        <title>Editar Arquivo</title>
-        <link href="../bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link href="../plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.css" rel="stylesheet">
-        <link href="../css/style.css" rel="stylesheet">
-            <!-- color CSS -->
-      <link href="../css/colors/gray-dark.css" id="theme" rel="stylesheet">
+        <title>Editar Arquivo - Arker Data Admin</title>
+        <link href="/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.css" rel="stylesheet">
+        <link href="/css/style.css" rel="stylesheet">
+        <link href="/css/colors/gray-dark.css" id="theme" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+        <style>
+          .form-group { margin-bottom: 15px; }
+          #regra-panel .row { margin-bottom: 10px; align-items: flex-end; } /* Alinha itens na base */
+          #regra-panel hr { margin-top: 0; margin-bottom: 15px; }
+          .form-check-input { margin-left: 10px; transform: scale(1.5); } /* Aumenta checkbox */
+          .radio-label { margin-left: 5px; } /* Espaço para label do radio */
+        </style>
     </head>
     <body class="fix-header">
         <div id="wrapper">
-                <nav class="navbar navbar-default navbar-static-top m-b-0">
-              <div class="navbar-header">
-                  <div class="top-left-part">
-                      <a class="logo" href="index.html">
-                          <span class="hidden-xs">
-                              <img src="/plugins/images/logo.webp" alt="home" class="dark-logo" width="200px">
-                          </span>
-                      </a>
-                  </div>
-              </div>
-          </nav>
-          <div class="navbar-default sidebar" role="navigation">
-              <div class="sidebar-nav slimscrollsidebar">
-                  <div class="sidebar-head">
-                      <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu">Navigation</span></h3>
-                  </div>
-                  <ul class="nav" id="side-menu">
-                      <li> <a class="waves-effect active"><i class="mdi mdi-table fa-fw"></i> <span class="hide-menu">Tabelas<span class="fa arrow"></span></span></a>
-                          <ul class="nav nav-second-level">
-                              <li><a href="/cliente"><i class="ti-user fa-fw"></i><span class="hide-menu">Cliente</span></a></li>
-                              <li><a href="/tipoarquivo"><i class="ti-files fa-fw"></i><span class="hide-menu">Tipo Arquivo</span></a></li>
-                              <li><a href="/extensao"><i class="ti-file fa-fw"></i><span class="hide-menu">Extensão</span></a></li>
-                              <li><a href="/regra"><i class="ti-key fa-fw"></i><span class="hide-menu">Regra</span></a></li>
-                              <li><a href="/arquivo"><i class="ti-file fa-fw"></i><span class="hide-menu">Arquivo</span></a></li>
-                          </ul>
-                      </li>   
-                  </ul>
-              </div>
-          </div>
+            <nav class="navbar navbar-default navbar-static-top m-b-0">
+                <div class="navbar-header">
+                    <div class="top-left-part">
+                        <a class="logo" href="/">
+                            <span class="hidden-xs">
+                                <img src="/plugins/images/logo.webp" alt="home" class="dark-logo" width="200px">
+                            </span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        <div class="navbar-default sidebar" role="navigation">
+            <div class="sidebar-nav slimscrollsidebar">
+                <div class="sidebar-head">
+                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu"></span></h3>
+                </div>
+                <ul class="nav" id="side-menu">
+                    <li><a href="/dash"><i class="mdi mdi-chart-bar"></i><span class="hide-menu"> Dashboard</span></a></li>
+                    <li> <a class="waves-effect active"><i class="mdi mdi-table fa-fw"></i> <span class="hide-menu">Tabelas<span class="fa arrow"></span></span></a>
+                        <ul class="nav nav-second-level">
+                            <li><a href="/cliente"><i class="ti-user fa-fw"></i><span class="hide-menu">Cliente</span></a></li>
+                            <li><a href="/tipoarquivo"><i class="ti-files fa-fw"></i><span class="hide-menu">Tipo Arquivo</span></a></li>
+                            <li><a href="/extensao"><i class="ti-file fa-fw"></i><span class="hide-menu">Extensão</span></a></li>
+                            <li><a href="/regra"><i class="ti-key fa-fw"></i><span class="hide-menu">Regra</span></a></li>
+                            <li><a href="/arquivo"><i class="ti-file fa-fw"></i><span class="hide-menu">Arquivo</span></a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
             <div id="page-wrapper">
                 <div class="container-fluid">
                     <div class="row bg-title">
                         <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
                             <h4 class="page-title">Editar Arquivo</h4>
                         </div>
+                         <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
+                              <ol class="breadcrumb">
+                                  <li><a href="#">Tabelas</a></li>
+                                  <li class="active">Arquivo</li>
+                              </ol>
+                          </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-12">
                             <div class="panel">
                                 <div class="panel-heading">
-                                    Editar Arquivo
+                                    Editar Configuração do Arquivo
                                 </div>
                                 <div class="panel-body">
                                     <form action="/editarArquivo" id="formArquivo" method="POST">
                                         <input type="hidden" name="IdCliente_TipoArquivo" value="${arquivo.IdCliente_TipoArquivo}">
-                                        
-                                        <!-- Cliente -->
-                                        <div class="form-group col-md-4">
-                                            <label for="cliente">Cliente</label>
-                                            <select class="form-control" id="IdCliente" name="IdCliente" required>
-                                                ${clientes.map(cliente => `
-                                                    <option value="${cliente.IdCliente}" ${cliente.IdCliente === arquivo.IdCliente ? 'selected' : ''}>
-                                                        ${cliente.Cliente}
-                                                    </option>
-                                                `).join('')}
-                                            </select>
+                                        <div class="row">
+                                            <!-- Cliente -->
+                                            <div class="form-group col-md-4">
+                                                <label for="IdCliente">Cliente *</label>
+                                                <select class="form-control" id="IdCliente" name="IdCliente" required>
+                                                    ${clientes.map(cliente => `
+                                                        <option value="${cliente.IdCliente}" ${cliente.IdCliente === arquivo.IdCliente ? 'selected' : ''}>
+                                                            ${cliente.Cliente}
+                                                        </option>
+                                                    `).join('')}
+                                                </select>
+                                            </div>
+                                            <!-- Tipo de Arquivo -->
+                                            <div class="form-group col-md-4">
+                                                <label for="IdTipoArquivo">Tipo Arquivo *</label>
+                                                <select class="form-control" id="IdTipoArquivo" name="IdTipoArquivo" required>
+                                                    ${tiposArquivo.map(tipo => `
+                                                        <option value="${tipo.IdTipoArquivo}" ${tipo.IdTipoArquivo === arquivo.IdTipoArquivo ? 'selected' : ''}>
+                                                            ${tipo.TipoArquivo}
+                                                        </option>
+                                                    `).join('')}
+                                                </select>
+                                            </div>
+                                            <!-- Extensão -->
+                                            <div class="form-group col-md-4">
+                                                <label for="IdExtensaoArquivo">Extensão *</label>
+                                                <select class="form-control" id="IdExtensaoArquivo" name="IdExtensaoArquivo" required>
+                                                    ${extensoes.map(extensao => `
+                                                        <option value="${extensao.IdExtensaoArquivo}" ${extensao.IdExtensaoArquivo === arquivo.IdExtensaoArquivo ? 'selected' : ''}>
+                                                            ${extensao.ExtensaoArquivo}
+                                                        </option>
+                                                    `).join('')}
+                                                </select>
+                                            </div>
                                         </div>
-    
-                                        <!-- Tipo de Arquivo -->
-                                        <div class="form-group col-md-4">
-                                            <label for="tipoArquivo">Tipo Arquivo</label>
-                                            <select class="form-control" id="tipoArquivo" name="IdTipoArquivo" required>
-                                                ${tiposArquivo.map(tipo => `
-                                                    <option value="${tipo.IdTipoArquivo}" ${tipo.IdTipoArquivo === arquivo.IdTipoArquivo ? 'selected' : ''}>
-                                                        ${tipo.TipoArquivo}
-                                                    </option>
-                                                `).join('')}
-                                            </select>
+                                        <div class="row">
+                                            <!-- Encoding -->
+                                            <div class="form-group col-md-3">
+                                                <label for="Encoding">Encoding *</label>
+                                                <select class="form-control" id="Encoding" name="Encoding" required>
+                                                    <option value="UTF-8" ${arquivo.Encoding === 'UTF-8' ? 'selected' : ''}>UTF-8</option>
+                                                    <option value="windows-1252" ${arquivo.Encoding === 'windows-1252' ? 'selected' : ''}>windows-1252</option>
+                                                    <option value="latin1" ${arquivo.Encoding === 'latin1' ? 'selected' : ''}>latin1</option>
+                                                </select>
+                                            </div>
+                                            <!-- IsHeader -->
+                                            <div class="form-group col-md-3">
+                                                <label for="IsHeader">Possui Cabeçalho? *</label>
+                                                <select class="form-control" id="IsHeader" name="IsHeader" required>
+                                                    <option value="1" ${arquivo.IsHeader == 1 ? 'selected' : ''}>Sim</option>
+                                                    <option value="0" ${arquivo.IsHeader == 0 ? 'selected' : ''}>Não</option>
+                                                </select>
+                                            </div>
+                                            <!-- Chave -->
+                                            <div class="form-group col-md-3">
+                                                <label for="Chave">Chave (Separador) *</label>
+                                                <input type="text" class="form-control" id="Chave" name="Chave" value="${arquivo.Chave || ''}" required>
+                                            </div>
+                                             <!-- Ativo -->
+                                            <div class="form-group col-md-3">
+                                                <label for="Ativo">Ativo *</label>
+                                                <select class="form-control" id="Ativo" name="Ativo" required>
+                                                    <option value="1" ${arquivo.Ativo === true ? 'selected' : ''}>Sim</option>
+                                                    <option value="0" ${arquivo.Ativo === false ? 'selected' : ''}>Não</option>
+                                                </select>
+                                            </div>
                                         </div>
-    
-                                        <!-- Extensão -->
-                                        <div class="form-group col-md-4">
-                                            <label for="extensao">Extensão</label>
-                                            <select class="form-control" id="extensao" name="IdExtensaoArquivo" required>
-                                                ${extensoes.map(extensao => `
-                                                    <option value="${extensao.IdExtensaoArquivo}" ${extensao.IdExtensaoArquivo === arquivo.IdExtensaoArquivo ? 'selected' : ''}>
-                                                        ${extensao.ExtensaoArquivo}
-                                                    </option>
-                                                `).join('')}
-                                            </select>
+                                        <div class="row">
+                                            <!-- Header -->
+                                            <div class="form-group col-md-12">
+                                                <label for="Header">Header (Campos separados por vírgula) *</label>
+                                                <input type="text" class="form-control" id="Header" name="Header" value="${arquivo.Header || ''}" required>
+                                            </div>
                                         </div>
-    
-                                        <!-- Outros campos -->
-                                        <div class="form-group col-md-6">
-                                            <label for="encoding">Encoding</label>
-                                            <select class="form-control" id="encoding" name="Encoding" required>
-                                                <option value="UTF-8" ${arquivo.Encoding === 'UTF-8' ? 'selected' : ''}>UTF-8</option>
-                                                                                              <option value="windows-1252" ${arquivo.Encoding === 'windows-1252' ? 'selected' : ''}>windows-1252</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group col-md-6">
-                                            <label for="isHeader">IsHeader</label>
-                                            <select class="form-control" id="isHeader" name="IsHeader" required>
-                                                <option value="1" ${arquivo.IsHeader === 1 ? 'selected' : ''}>Sim</option>
-                                                <option value="0" ${arquivo.IsHeader === 0 ? 'selected' : ''}>Não</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group col-md-12">
-                                            <label for="header">Header</label>
-                                            <input type="text" class="form-control" id="header" name="Header" value="${arquivo.Header}" required>
-                                        </div>
-                                        <div class="form-group col-md-6">
-                                            <label for="chave">Chave</label>
-                                            <input type="text" class="form-control" id="chave" name="Chave" value="${arquivo.Chave}" required>
-                                        </div>
-                                        <div class="form-group col-md-6">
-                                            <label for="ativo">Ativo</label>
-                                            <select class="form-control" id="ativo" name="Ativo" required>
-                                                <option value="1" ${arquivo.Ativo === true ? 'selected' : ''}>Sim</option>
-                                                <option value="0" ${arquivo.Ativo === false ? 'selected' : ''}>Não</option>
-                                            </select>
-                                        </div>  
                                         <input type="hidden" id="regrasJson" name="regrasJson">
                                         <button type="submit" class="btn btn-primary">Salvar Alterações</button>
                                     </form>
@@ -305,332 +326,345 @@ router.get('/editarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
                             </div>
                         </div>
                     </div>
-                                                          <!-- Regras -->
-<div class="row">
-    <div class="col-sm-12">
-        <div class="panel">
-            <div class="panel-heading">
-                Regras do Arquivo
-                <button type="button" id="btnRedefinirSchema" class="btn btn-primary" style="margin-left: 20px;">
-                    <i class="ti-reload"></i> Redefinir Schema
-                </button>
-            </div>
-            <div class="panel-body" id="regra-panel">
-                <form id="formRegra">
+                    <!-- Regras -->
                     <div class="row">
-                        <div class="col-md-12">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <h5>Nome Campo</h5>
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    Regras do Arquivo
+                                    <button type="button" id="btnRedefinirSchema" class="btn btn-info" style="margin-left: 20px;">
+                                        <i class="fa fa-refresh"></i> Redefinir Schema com Base no Header
+                                    </button>
                                 </div>
-                                <div class="col-md-3">
-                                    <h5>Tipo De Dado</h5>
-                                </div>
-                                <div class="col-md-3">
-                                    <h5>Regra</h5>
-                                </div>
-                                <div class="col-md-3">
-                                    <h5>Obrigatório</h5>
+                                <div class="panel-body" id="regra-panel">
+                                    <form id="formRegra">
+                                        <div class="row">
+                                            
+                                            <div class="col-md-2"><h5>Nome Campo</h5></div>
+                                            <div class="col-md-2"><h5>Tipo De Dado *</h5></div>
+                                            <div class="col-md-2"><h5>Formato</h5></div>
+                                            <div class="col-md-3"><h5>Regra *</h5></div>
+                                            <div class="col-md-2 text-center"><h5>Obrigatório?</h5></div>
+                                            <div class="col-md-1 text-center"><h5>É Data?</h5></div>
+                                        </div>
+                                        <hr>
+                                        <!-- As linhas de regras serão geradas aqui pelo JS -->
+                                    </form>
                                 </div>
                             </div>
-                            <hr>
                         </div>
                     </div>
-                    ${regras.map(function(regra, index) {
-                        return (
-                            '<div class="row">' +
-                                '<div class="col-md-3">' +
-                                    '<input type="text" class="form-control" name="DescricaoCampo' + index + '" value="' + regra.DescricaoCampo + '" readonly>' +
-                                '</div>' +
-                                '<div class="col-md-3">' +
-                                    '<select class="form-control" name="TipoDeDado' + index + '">' +
-                                        '<option value="Texto"' + (regra.IdTipoDeDado === 'Texto' ? ' selected' : '') + '>Texto</option>' +
-                                        '<option value="Número"' + (regra.IdTipoDeDado === 'Número' ? ' selected' : '') + '>Número</option>' +
-                                        '<option value="Data"' + (regra.IdTipoDeDado === 'Data' ? ' selected' : '') + '>Data</option>' +
-                                        '<option value="Booleano"' + (regra.IdTipoDeDado === 'Booleano' ? ' selected' : '') + '>Booleano</option>' +
-                                    '</select>' +
-                                '</div>' +
-                                '<div class="col-md-3">' +
-                                    '<select class="form-control" name="Regra' + index + '" data-regra-id="' + regra.IdRegra + '">' +
-                                        '<!-- Opções de regras serão preenchidas dinamicamente via JavaScript -->' +
-                                    '</select>' +
-                                '</div>' +
-                                '<div class="col-md-3">' +
-                                    '<input type="checkbox" name="Obrigatorio' + index + '"' + (regra.Obrigatorio === 1 ? ' checked' : '') + '>' +
-                                '</div>' +
-                            '</div>'
-                        );
-                    }).join('')}
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
                 </div>
+                <footer class="footer text-center"> 2025 &copy; FormArker </footer>
             </div>
         </div>
-    
-<script src="../plugins/bower_components/jquery/dist/jquery.min.js"></script>
-<script>
-    // Função para carregar as regras do banco de dados
-    async function carregarRegras() {
-        try {
-            const response = await fetch('/regras');
-            const regras = await response.json();
-            return regras.filter(function(regra) {
-                return regra.Ativo === true; // Filtra apenas regras ativas
-            });
-        } catch (error) {
-            console.error('Erro ao carregar regras:', error);
-            return [];
-        }
-    }
 
-    // Função para preencher as opções de regras
-    async function preencherRegras() {
-        const regras = await carregarRegras();
+    <script src="/plugins/bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.js"></script>
+    <script src="/js/jquery.slimscroll.js"></script>
+    <script src="/js/waves.js"></script>
+    <script src="/js/custom.min.js"></script>
+    <script>
+        // Armazena os dados buscados para uso no JS
+        const tiposDados = ${JSON.stringify(tiposDados)};
+        const regrasDb = ${JSON.stringify(regrasDb)};
+        const nomeCampoDataDb = "${arquivo.NomeCampoData || ''}";
+        console.log('Tipos de Dados disponíveis:', tiposDados);
+        console.log('Regras do Banco (regrasDb):', regrasDb);
+        let todasRegrasSistema = []; // Para armazenar regras de /regras
 
-        // Itera sobre todos os selects de regras
-        document.querySelectorAll('[name^="Regra"]').forEach(function(select, index) {
-            // Limpa as opções existentes
-            select.innerHTML = '';
-
-            // Obtém a regra cadastrada para este campo
-            const regraCadastradaId = select.dataset.regraId; // Pega o IdRegra cadastrado
-            console.log('Regra Cadastrada para o Campo ' + index + ':', regraCadastradaId);
-
-            // Preenche as opções
-            regras.forEach(function(regra) {
-                const option = document.createElement('option');
-                option.value = regra.IdRegra;
-                option.textContent = regra.Regra;
-
-                // Define a regra cadastrada como selecionada
-                if (regra.IdRegra == regraCadastradaId) { // Use == para comparar valores
-                    option.selected = true;
-                    console.log('Regra selecionada: ' + regra.Regra);
-                }
-
-                select.appendChild(option);
-            });
-        });
-    }
-
-    // Função para gerar os inputs de regras dinamicamente
-    async function gerarInputsRegra() {
-        const formRegra = document.getElementById('formRegra');
-        const headerInput = document.getElementById('header');
-
-        // Verifica se os elementos existem
-        if (!formRegra || !headerInput) {
-            console.error('Elementos formRegra ou headerInput não encontrados no DOM.');
-            return;
+        // Função para buscar TODAS as regras ativas do sistema (para os selects)
+        async function carregarRegrasSistema() {
+            try {
+                const response = await fetch('/regras'); // Endpoint que busca de tblregra
+                if (!response.ok) throw new Error('Falha ao buscar regras do sistema');
+                const regras = await response.json();
+                todasRegrasSistema = regras.filter(r => r.Ativo === true);
+            } catch (error) {
+                console.error('Erro ao carregar regras do sistema:', error);
+                alert('Erro ao carregar regras do sistema. Verifique o console.');
+            }
         }
 
-        // Verifica se o campo header está vazio
-        if (!headerInput.value.trim()) {
-            alert('O campo "Header" está vazio. Insira os valores separados por vírgula.');
-            return;
-        }
+        // Função para gerar UMA linha de regra no formulário
+        function gerarLinhaRegra(index, campoInfo) {
+            const { DescricaoCampo = '', IdTipoDeDado = null, Formato = '', IdRegra = null, Obrigatorio = false } = campoInfo;
+            const isDataField = DescricaoCampo === nomeCampoDataDb;
 
-        // Limpa o conteúdo atual do formulário de regras (exceto o título e a linha)
-        const tituloELinha = formRegra.querySelector('.row:first-child');
-        if (!tituloELinha) {
-            console.error('Elemento .row:first-child não encontrado dentro de formRegra.');
-            return;
-        }
-
-        formRegra.innerHTML = ''; // Limpa todo o conteúdo
-        formRegra.appendChild(tituloELinha); // Adiciona o título e a linha de volta
-
-        // Separa os valores do header por vírgula
-        const headerValues = headerInput.value.split(',');
-
-        // Verifica se há valores válidos no header
-        if (headerValues.length === 0 || headerValues.every(function(val) { return !val.trim(); })) {
-            alert('O campo "Header" não contém valores válidos. Insira os valores separados por vírgula.');
-            return;
-        }
-
-        // Carrega as regras do banco de dados
-        const regras = await carregarRegras();
-
-        // Itera sobre os valores do header para criar os inputs
-        headerValues.forEach(function(campo, index) {
             const row = document.createElement('div');
-            row.className = 'row';
+            row.className = 'row regra-linha'; // Adiciona classe para fácil seleção
+            row.dataset.index = index; // Guarda o índice
 
-            // Input para o Nome do Campo
+            // Coluna: É Data?
+            const colData = document.createElement('div');
+            colData.className = 'form-group col-md-1 text-center';
+            const radioData = document.createElement('input');
+            radioData.type = 'radio';
+            radioData.className = 'form-check-input campo-data-radio'; // <-- CORRIGIDO
+            radioData.name = 'campoDataIndicador';
+            radioData.value = DescricaoCampo;
+            radioData.checked = isDataField;
+            colData.appendChild(radioData);
+
+            // Coluna: Nome do Campo (Readonly)
             const colNomeCampo = document.createElement('div');
-            colNomeCampo.className = 'form-group col-md-3';
+            colNomeCampo.className = 'form-group col-md-2';
             const inputNomeCampo = document.createElement('input');
             inputNomeCampo.type = 'text';
-            inputNomeCampo.className = 'form-control';
-            inputNomeCampo.value = campo.trim();
-            inputNomeCampo.required = true;
+            inputNomeCampo.className = 'form-control nome-campo';
+            inputNomeCampo.value = DescricaoCampo;
             inputNomeCampo.readOnly = true;
             colNomeCampo.appendChild(inputNomeCampo);
 
-            // Select para o Tipo de Dado
+            // Coluna: Tipo de Dado (Select)
             const colTipoDado = document.createElement('div');
-            colTipoDado.className = 'form-group col-md-3';
+            colTipoDado.className = 'form-group col-md-2';
             const selectTipoDado = document.createElement('select');
-            selectTipoDado.className = 'form-control';
+            selectTipoDado.className = 'form-control tipo-dado';
             selectTipoDado.required = true;
-            ['Texto', 'Número', 'Data', 'Booleano'].forEach(function(tipo) {
-                const option = document.createElement('option');
-                option.value = tipo;
-                option.textContent = tipo;
+            // Option vazia
+            selectTipoDado.appendChild(new Option('Selecione...', ''));
+            // Preenche com tipos de dados buscados
+            tiposDados.forEach(tipo => {
+
+                const option = new Option(tipo.TipoDeDado, tipo.IdTipoDeDados);
+                option.selected = (tipo.IdTipoDeDados == IdTipoDeDado); // Usa == para comparação flexível
                 selectTipoDado.appendChild(option);
             });
             colTipoDado.appendChild(selectTipoDado);
 
-            // Select para a Regra
+            // Coluna: Formato (Input Text)
+            const colFormato = document.createElement('div');
+            colFormato.className = 'form-group col-md-2';
+            const inputFormato = document.createElement('input');
+            inputFormato.type = 'text';
+            inputFormato.className = 'form-control formato';
+            inputFormato.value = Formato || '';
+            inputFormato.placeholder = 'Ex: dd/MM/yyyy';
+            colFormato.appendChild(inputFormato);
+
+            // Coluna: Regra (Select)
             const colRegra = document.createElement('div');
             colRegra.className = 'form-group col-md-3';
             const selectRegra = document.createElement('select');
-            selectRegra.className = 'form-control';
-            selectRegra.name = 'Regra' + index;
-            selectRegra.dataset.regraId = regras[index] ? regras[index].IdRegra : ''; // Armazena o IdRegra
+            selectRegra.className = 'form-control regra-select';
             selectRegra.required = true;
-            regras.forEach(function(regra) {
-                const option = document.createElement('option');
-                option.value = regra.IdRegra;
-                option.textContent = regra.Regra;
+             // Option vazia
+            selectRegra.appendChild(new Option('Selecione...', ''));
+            // Preenche com regras do sistema
+            todasRegrasSistema.forEach(regra => {
+                const option = new Option(regra.Regra, regra.IdRegra);
+                 option.selected = (regra.IdRegra == IdRegra); // Usa ==
                 selectRegra.appendChild(option);
             });
             colRegra.appendChild(selectRegra);
 
-            // Checkbox para Obrigatório
+            // Coluna: Obrigatório (Checkbox)
             const colObrigatorio = document.createElement('div');
-            colObrigatorio.className = 'form-group col-md-3';
+            colObrigatorio.className = 'form-group col-md-2 text-center';
             const checkboxObrigatorio = document.createElement('input');
             checkboxObrigatorio.type = 'checkbox';
-            checkboxObrigatorio.name = 'Obrigatorio' + index;
-            checkboxObrigatorio.className = 'form-check-input';
+            checkboxObrigatorio.className = 'form-check-input obrigatorio';
+            checkboxObrigatorio.checked = (Obrigatorio == 1 || Obrigatorio === true); // Flexibilidade na verificação
             colObrigatorio.appendChild(checkboxObrigatorio);
 
+            // Add event listener to the Tipo de Dado select for THIS row
+            selectTipoDado.addEventListener('change', function () {
+                // Find the corresponding radio button in the same row
+                // 'this' refers to the select element that changed
+                const rowElement = this.closest('.regra-linha'); // Get the parent row div
+                const radioDataElement = rowElement.querySelector('.campo-data-radio'); // Find the radio button using its class
+
+                // Find the selected type object from the global tiposDados array
+                const selectedTipo = tiposDados.find(tipo => tipo.IdTipoDeDados === parseInt(this.value));
+
+                // Check if the selected type exists and its name is 'date' (case-insensitive check is safer)
+                if (selectedTipo && selectedTipo.TipoDeDado.toLowerCase() === 'date') {
+                    // If it's a date type, enable the radio button
+                    radioDataElement.disabled = false;
+                } else {
+                    // Otherwise, disable and uncheck the radio button
+                    radioDataElement.disabled = true;
+                    radioDataElement.checked = false;
+                }
+            });
+                        const initialSelectedTipo = tiposDados.find(tipo => tipo.IdTipoDeDados === parseInt(selectTipoDado.value));
+             if (initialSelectedTipo && initialSelectedTipo.TipoDeDado.toLowerCase() === 'date') {
+                radioData.disabled = false;
+            } else {
+                radioData.disabled = true; //
+            }
+
             // Adiciona as colunas à linha
+            
             row.appendChild(colNomeCampo);
             row.appendChild(colTipoDado);
+            row.appendChild(colFormato);
             row.appendChild(colRegra);
             row.appendChild(colObrigatorio);
+            row.appendChild(colData);
 
-            // Adiciona a linha ao formulário de regras
-            formRegra.appendChild(row);
-        });
+            return row;
+        }
 
-        // Preenche as regras após gerar os inputs
-        preencherRegras();
-    }
+        // Função para popular o formulário de regras com base nos dados do DB ou do Header
+        function popularFormularioRegras(usarHeader = false) {
+            const formRegra = document.getElementById('formRegra');
+            const headerInput = document.getElementById('Header');
+
+            // Limpa as linhas de regras existentes (mantém o cabeçalho da tabela)
+            formRegra.querySelectorAll('.regra-linha').forEach(linha => linha.remove());
+
+            let camposParaGerar = [];
+
+            if (usarHeader) {
+                if (!headerInput || !headerInput.value.trim()) {
+                    alert('O campo "Header" está vazio ou não foi encontrado. Insira os nomes dos campos separados por vírgula.');
+                    return;
+                }
+                const nomesCamposHeader = headerInput.value.split(',').map(h => h.trim()).filter(h => h);
+                camposParaGerar = nomesCamposHeader.map(nome => ({ DescricaoCampo: nome })); // Cria objetos baseados no header
+            } else {
+                // Usa os dados das regras buscadas do banco de dados
+                camposParaGerar = regrasDb;
+            }
+
+            // Gera as linhas no formulário
+            camposParaGerar.forEach((campoInfo, index) => {
+                const linhaHtml = gerarLinhaRegra(index, campoInfo);
+                formRegra.appendChild(linhaHtml);
+            });
+        }
+
+        // Evento de submit do formulário principal
         document.getElementById('formArquivo').addEventListener('submit', function (e) {
-    e.preventDefault(); // Evita o envio padrão do formulário
+            e.preventDefault(); // Evita o envio padrão
 
-    const regras = [];
-    const regraInputs = document.querySelectorAll('#formRegra .row');
+            const regrasParaEnviar = [];
+            const linhasRegra = document.querySelectorAll('#formRegra .regra-linha');
+            let campoDataSelecionado = document.querySelector('input[name="campoDataIndicador"]:checked');
 
-    regraInputs.forEach((row) => {
-        const inputCampo = row.querySelector('input[type="text"]');
-        const selectTipoDado = row.querySelector('select[name^="TipoDeDado"]');
-        const selectRegra = row.querySelector('select[name^="Regra"]');
-        const checkboxObrigatorio = row.querySelector('input[type="checkbox"]');
+            linhasRegra.forEach(row => {
+                const nomeCampoInput = row.querySelector('.nome-campo');
+                const tipoDadoSelect = row.querySelector('.tipo-dado');
+                const formatoInput = row.querySelector('.formato');
+                const regraSelect = row.querySelector('.regra-select');
+                const obrigatorioCheckbox = row.querySelector('.obrigatorio');
 
-        if (!inputCampo || !selectTipoDado || !selectRegra || !checkboxObrigatorio) {
-            console.error('Elementos não encontrados na linha:', row);
-            return;
-        }
+                // Validação básica (pode ser melhorada)
+                if (!nomeCampoInput || !tipoDadoSelect || !formatoInput || !regraSelect || !obrigatorioCheckbox) {
+                    console.error('Elemento faltando na linha de regra:', row);
+                    alert('Erro ao processar uma das linhas de regra. Verifique o console.');
+                    throw new Error("Elemento de regra faltando"); // Interrompe o processo
+                }
+                 if (!tipoDadoSelect.value) {
+                    alert(\`Por favor, selecione o Tipo de Dado para o campo: \${nomeCampoInput.value}\`);
+                    tipoDadoSelect.focus();
+                    throw new Error("Tipo de dado não selecionado");
+                }
+                if (!regraSelect.value) {
+                    alert(\`Por favor, selecione a Regra para o campo: \${nomeCampoInput.value}\`);
+                    regraSelect.focus();
+                    throw new Error("Regra não selecionada");
+                }
 
-        regras.push({
-            DescricaoCampo: inputCampo.value,
-            TipoDeDado: selectTipoDado.value,
-            IdRegra: selectRegra.value,
-            Obrigatorio: checkboxObrigatorio.checked ? 1 : 0
+
+                regrasParaEnviar.push({
+                    DescricaoCampo: nomeCampoInput.value,
+                    IdTipoDeDado: parseInt(tipoDadoSelect.value) || null, // Garante INT ou null
+                    Formato: formatoInput.value,
+                    IdRegra: parseInt(regraSelect.value) || null, // Garante INT ou null
+                    Obrigatorio: obrigatorioCheckbox.checked ? 1 : 0,
+                    // Adiciona a flag 'Data' se este for o campo selecionado no radio button
+                    Data: (campoDataSelecionado && campoDataSelecionado.value === nomeCampoInput.value) ? 1 : 0
+                });
+            });
+
+            // Adiciona o JSON ao campo hidden
+            document.getElementById('regrasJson').value = JSON.stringify(regrasParaEnviar);
+            console.log('Regras JSON para enviar:', document.getElementById('regrasJson').value);
+
+            // Envia o formulário
+            this.submit();
         });
-    });
 
-    const regrasJson = JSON.stringify(regras);
-    console.log('Regras JSON:', regrasJson); // Adicione este log para depuração
-    document.getElementById('regrasJson').value = regrasJson;
+        // Evento do botão "Redefinir Schema"
+        document.getElementById('btnRedefinirSchema').addEventListener('click', () => {
+            if (confirm('Isso substituirá as regras atuais pelas definidas no campo Header. Deseja continuar?')) {
+                popularFormularioRegras(true); // Chama a função para usar o header
+            }
+        });
 
-    this.submit(); // Envia o formulário
-});
+        // Inicialização ao carregar a página
+        document.addEventListener('DOMContentLoaded', async () => {
+            await carregarRegrasSistema(); // Carrega as regras do sistema primeiro
+            popularFormularioRegras(false); // Popula com os dados do banco inicialmente
+        });
 
-    // Adiciona o evento ao botão "Redefinir Schema"
-    document.addEventListener('DOMContentLoaded', function() {
-        const btnRedefinirSchema = document.getElementById('btnRedefinirSchema');
-        if (btnRedefinirSchema) {
-            btnRedefinirSchema.addEventListener('click', gerarInputsRegra);
-        } else {
-            console.error('Botão btnRedefinirSchema não encontrado no DOM.');
-        }
-
-        // Preenche as regras ao carregar a página
-        preencherRegras();
-    });
-</script>
+    </script>
     </body>
     </html>
-    `); // Mantenha o HTML original aqui
+    `);
   } catch (err) {
-    console.error('Erro ao buscar arquivo:', err.message);
-    res.status(500).send('Erro ao buscar arquivo');
+    console.error('Erro ao buscar dados para edição do arquivo:', err.message, err.stack);
+    res.status(500).send('Erro ao buscar dados para edição do arquivo');
   } finally {
-    await closeConnection();
+    await closeConnection(req, res); // Passa req, res
   }
 });
 
-
-
-
-
+// --- Rota POST /editarArquivo (Lógica Atualizada) ---
 router.post('/editarArquivo', connectToDatabase, async (req, res) => {
   const {
-    IdCliente_TipoArquivo,
-    IdCliente,
-    IdTipoArquivo,
-    IdExtensaoArquivo,
-    Encoding,
-    IsHeader,
-    Header,
-    Chave,
-    Ativo,
-    regrasJson
+    IdCliente_TipoArquivo, IdCliente, IdTipoArquivo, IdExtensaoArquivo,
+    Encoding, IsHeader, Header, Chave, Ativo, regrasJson
   } = req.body;
 
-  // Verifica se regrasJson está presente
   if (!regrasJson) {
     return res.status(400).send('O campo regrasJson é obrigatório.');
   }
 
   let regras;
   try {
-    regras = JSON.parse(regrasJson); // Tenta parsear o JSON
+    regras = JSON.parse(regrasJson);
+    if (!Array.isArray(regras)) throw new Error('regrasJson não é um array.');
+    console.log('Regras recebidas e parseadas:', regras);
   } catch (err) {
     console.error('Erro ao parsear regrasJson:', err.message);
     return res.status(400).send('Formato inválido para regrasJson.');
   }
 
-  const transaction = new sql.Transaction(req.db); // Associa a transação à conexão ativa (req.db)
+  const transaction = new sql.Transaction(req.db); // Usa a conexão do request
 
   try {
-    // Inicia a transação
     await transaction.begin();
+    console.log("Transação iniciada para edição.");
 
-    // Atualizar o arquivo
+    // 1. Buscar o mapeamento de Tipos de Dados (Nome para ID) - Não necessário se o front envia ID
+    // Assumindo que o front já envia IdTipoDeDados (INT) como coletado no JS atualizado.
+
+    // 2. Determinar NomeCampoData a partir das regras recebidas
+    const regraData = regras.find(r => r.Data === 1); // Procura pela flag Data: 1
+    const nomeCampoData = regraData ? regraData.DescricaoCampo : null;
+    console.log('NomeCampoData determinado:', nomeCampoData);
+
+    // 3. Atualizar o registro principal em tblcliente_tipoarquivo
     const requestArquivo = new sql.Request(transaction);
     requestArquivo.input('IdCliente', sql.Int, IdCliente);
     requestArquivo.input('IdTipoArquivo', sql.Int, IdTipoArquivo);
     requestArquivo.input('IdExtensaoArquivo', sql.Int, IdExtensaoArquivo);
     requestArquivo.input('Encoding', sql.NVarChar, Encoding);
-    requestArquivo.input('IsHeader', sql.Bit, IsHeader);
+    requestArquivo.input('IsHeader', sql.Int, IsHeader); // Usar Bit para booleano/int 0/1
     requestArquivo.input('Header', sql.NVarChar, Header);
     requestArquivo.input('Chave', sql.NVarChar, Chave);
-    requestArquivo.input('Ativo', sql.Int, Ativo);
-    requestArquivo.input('IdCliente_TipoArquivo', sql.Int, IdCliente_TipoArquivo);
+    requestArquivo.input('Ativo', sql.Int, Ativo); // Usar Bit
+    requestArquivo.input('NomeCampoData', sql.NVarChar, nomeCampoData); // Atualiza o campo data
+    requestArquivo.input('IdCliente_TipoArquivo', sql.Int, IdCliente_TipoArquivo); // WHERE clause
 
     const updateArquivoQuery = `
       UPDATE tblcliente_tipoarquivo
-      SET 
+      SET
         IdCliente = @IdCliente,
         IdTipoArquivo = @IdTipoArquivo,
         IdExtensaoArquivo = @IdExtensaoArquivo,
@@ -638,180 +672,193 @@ router.post('/editarArquivo', connectToDatabase, async (req, res) => {
         IsHeader = @IsHeader,
         Header = @Header,
         Chave = @Chave,
-        Ativo = @Ativo
+        Ativo = @Ativo,
+        NomeCampoData = @NomeCampoData, -- Incluído
+        DataAlteracao = GETDATE() -- Atualiza data de alteração
       WHERE IdCliente_TipoArquivo = @IdCliente_TipoArquivo
     `;
     await requestArquivo.query(updateArquivoQuery);
+    console.log('Registro principal tblcliente_tipoarquivo atualizado.');
 
-    // Processar as regras
+    // 4. Deletar TODAS as regras antigas associadas a este arquivo
+    const requestDeleteRegras = new sql.Request(transaction);
+    requestDeleteRegras.input('IdCliente_TipoArquivo', sql.Int, IdCliente_TipoArquivo);
+    const deleteRegrasQuery = `
+      DELETE FROM tblcliente_tipoarquivo_regra
+      WHERE IdCliente_TipoArquivo = @IdCliente_TipoArquivo
+    `;
+    const deleteResult = await requestDeleteRegras.query(deleteRegrasQuery);
+    console.log(`${deleteResult.rowsAffected[0]} regras antigas deletadas.`);
+
+    // 5. Inserir as novas regras recebidas
     for (const regra of regras) {
-      const { DescricaoCampo, TipoDeDado, IdRegra, Obrigatorio } = regra;
+      const { IdRegra, IdTipoDeDado, Formato, DescricaoCampo, Obrigatorio } = regra;
+      console.log('Inserindo regra para o campo:', DescricaoCampo);
 
-      // Cria um novo objeto request para cada regra
-      const requestRegra = new sql.Request(transaction);
-      requestRegra.input('IdCliente_TipoArquivo', sql.Int, IdCliente_TipoArquivo);
-      requestRegra.input('DescricaoCampo', sql.NVarChar, DescricaoCampo);
-
-      // Verifica se a regra já existe
-      const checkRegraQuery = `
-        SELECT 1 FROM tblcliente_tipoarquivo_regra
-        WHERE IdCliente_TipoArquivo = @IdCliente_TipoArquivo AND DescricaoCampo = @DescricaoCampo
-      `;
-      const regraExists = await requestRegra.query(checkRegraQuery);
-
-      if (regraExists.recordset.length > 0) {
-        // Atualiza a regra existente
-        const updateRegraQuery = `
-          UPDATE tblcliente_tipoarquivo_regra
-          SET 
-            TipoDeDado = @TipoDeDado,
-            IdRegra = @IdRegra,
-            Obrigatorio = @Obrigatorio
-          WHERE IdCliente_TipoArquivo = @IdCliente_TipoArquivo AND DescricaoCampo = @DescricaoCampo
-        `;
-        requestRegra.input('TipoDeDado', sql.NVarChar, TipoDeDado);
-        requestRegra.input('IdRegra', sql.Int, IdRegra);
-        requestRegra.input('Obrigatorio', sql.Bit, Obrigatorio);
-        await requestRegra.query(updateRegraQuery);
-      } else {
-        // Adiciona uma nova regra
-        const insertRegraQuery = `
-          INSERT INTO tblcliente_tipoarquivo_regra 
-          (IdCliente_TipoArquivo, DescricaoCampo, TipoDeDado, IdRegra, Obrigatorio, DataInsercao)
-          VALUES (@IdCliente_TipoArquivo, @DescricaoCampo, @TipoDeDado, @IdRegra, @Obrigatorio, GETDATE())
-        `;
-        requestRegra.input('TipoDeDado', sql.NVarChar, TipoDeDado);
-        requestRegra.input('IdRegra', sql.Int, IdRegra);
-        requestRegra.input('Obrigatorio', sql.Bit, Obrigatorio);
-        await requestRegra.query(insertRegraQuery);
+      // Validação básica dos dados da regra
+      if (IdTipoDeDado == null || IdRegra == null || DescricaoCampo == null || Obrigatorio == null) {
+           console.warn('Regra inválida ou incompleta sendo pulada:', regra);
+           continue; // Pula esta regra se dados essenciais estiverem faltando
       }
+
+
+      const requestInsertRegra = new sql.Request(transaction);
+      requestInsertRegra.input('IdCliente_TipoArquivo', sql.Int, IdCliente_TipoArquivo);
+      requestInsertRegra.input('IdRegra', sql.Int, IdRegra);
+      requestInsertRegra.input('IdTipoDeDado', sql.Int, IdTipoDeDado); // Já deve ser INT vindo do front
+      requestInsertRegra.input('Formato', sql.VarChar, Formato || null); // Permite nulo se vazio
+      requestInsertRegra.input('DescricaoCampo', sql.NVarChar, DescricaoCampo);
+      requestInsertRegra.input('Obrigatorio', sql.Bit, Obrigatorio); // Bit
+
+      const insertRegraQuery = `
+        INSERT INTO tblcliente_tipoarquivo_regra
+        (IdCliente_TipoArquivo, IdRegra, IdTipoDeDado, Formato, DescricaoCampo, Obrigatorio, DataInsercao)
+        VALUES (@IdCliente_TipoArquivo, @IdRegra, @IdTipoDeDado, @Formato, @DescricaoCampo, @Obrigatorio, GETDATE());
+      `;
+      await requestInsertRegra.query(insertRegraQuery);
     }
+    console.log('Novas regras inseridas com sucesso.');
 
     // Commit da transação
     await transaction.commit();
+    console.log("Transação concluída com sucesso.");
 
     res.redirect('/arquivo'); // Redireciona para a página de arquivos
+
   } catch (err) {
-    // Rollback em caso de erro (apenas se a transação estiver ativa)
-    if (transaction._active) {
+    console.error('Erro ao atualizar arquivo:', err.message, err.stack);
+    // Rollback em caso de erro
+    if (transaction._active) { // Verifica se a transação está ativa
+      console.log("Erro detectado, iniciando rollback da transação.");
       await transaction.rollback();
+      console.log("Rollback concluído.");
+    } else {
+        console.log("Erro detectado, mas transação não está ativa para rollback.");
     }
-    console.error('Erro ao atualizar arquivo:', err.message);
-    res.status(500).send('Erro ao atualizar arquivo');
+    // Envia uma resposta de erro mais detalhada (opcional, cuidado em produção)
+    res.status(500).send(`Erro ao atualizar arquivo: ${err.message}`);
   } finally {
-    await closeConnection();
+    await closeConnection(req, res); // Passa req, res
   }
 });
 
+
+// --- Rota POST /cadastroarquivo (sem alterações, apenas para referência) ---
 router.post('/cadastroarquivo', connectToDatabase, async (req, res) => {
   const { IdCliente, IdTipoArquivo, IdExtensaoArquivo, Encoding, IsHeader, Header, Chave, Ativo, regrasJson } = req.body;
+  const transaction = new sql.Transaction(req.db); // Usa a conexão do request
 
   try {
+    await transaction.begin();
+    console.log('Transação iniciada para cadastro.');
+
     console.log('Dados recebidos:', { IdCliente, IdTipoArquivo, IdExtensaoArquivo, Encoding, IsHeader, Header, Chave, Ativo, regrasJson });
 
-    // Converte o JSON das regras
     const regras = JSON.parse(regrasJson);
     console.log('Regras parseadas:', regras);
 
-    // Encontra o campo selecionado como Data
-    const campoData = regras.find(regra => regra.Data === 1);
-    const nomeCampoData = campoData ? campoData.DescricaoCampo : null;
+    const regraData = regras.find(regra => regra.Data === 1); // Procura pela flag Data: 1
+    const nomeCampoData = regraData ? regraData.DescricaoCampo : null;
     console.log('Nome do campo data:', nomeCampoData);
 
-    // Cria uma nova instância de `sql.Request`
-    const request = new sql.Request();
-
-    // Verifica se a combinação de IdCliente e IdTipoArquivo já existe
+    // Verifica duplicidade DENTRO da transação
+    const requestCheck = new sql.Request(transaction);
     const checkDuplicateQuery = `
-      SELECT COUNT(*) AS count 
-      FROM tblcliente_tipoarquivo 
+      SELECT COUNT(*) AS count
+      FROM tblcliente_tipoarquivo
       WHERE IdCliente = @IdCliente AND IdTipoArquivo = @IdTipoArquivo;
     `;
-
-    request.input('IdCliente', sql.Int, IdCliente);
-    request.input('IdTipoArquivo', sql.Int, IdTipoArquivo);
-
-    const duplicateResult = await request.query(checkDuplicateQuery);
+    requestCheck.input('IdCliente', sql.Int, IdCliente);
+    requestCheck.input('IdTipoArquivo', sql.Int, IdTipoArquivo);
+    const duplicateResult = await requestCheck.query(checkDuplicateQuery);
     const count = duplicateResult.recordset[0].count;
     console.log('Verificação de duplicidade:', { count });
 
     if (count > 0) {
-      console.log('Combinação duplicada encontrada. Abortando inserção.');
-      return res.status(400).send('Combinação de IdCliente e IdTipoArquivo já existe.');
+      await transaction.rollback(); // Importante fazer rollback antes de retornar erro
+      console.log('Combinação duplicada encontrada. Rollback e abortando inserção.');
+      return res.status(400).send('Combinação de Cliente e Tipo de Arquivo já existe.');
     }
 
     // Insere o arquivo na tabela `tblcliente_tipoarquivo`
+    const requestInsertArquivo = new sql.Request(transaction);
     const insertArquivoQuery = `
-      INSERT INTO tblcliente_tipoarquivo 
-      (IdCliente, IdTipoArquivo, IdExtensaoArquivo, Encoding, IsHeader, Header, Chave, Ativo, NomeCampoData, DataInsercao) 
+      INSERT INTO tblcliente_tipoarquivo
+      (IdCliente, IdTipoArquivo, IdExtensaoArquivo, Encoding, IsHeader, Header, Chave, Ativo, NomeCampoData, DataInsercao)
+      OUTPUT INSERTED.IdCliente_TipoArquivo -- Retorna o ID gerado
       VALUES (@IdCliente, @IdTipoArquivo, @IdExtensaoArquivo, @Encoding, @IsHeader, @Header, @Chave, @Ativo, @NomeCampoData, GETDATE());
-      SELECT SCOPE_IDENTITY() AS IdCliente_TipoArquivo;
     `;
+    requestInsertArquivo.input('IdCliente', sql.Int, IdCliente); // Já definido acima
+    requestInsertArquivo.input('IdTipoArquivo', sql.Int, IdTipoArquivo); // Já definido acima
+    requestInsertArquivo.input('IdExtensaoArquivo', sql.Int, IdExtensaoArquivo);
+    requestInsertArquivo.input('Encoding', sql.NVarChar, Encoding);
+    requestInsertArquivo.input('IsHeader', sql.Int, IsHeader); // Bit
+    requestInsertArquivo.input('Header', sql.NVarChar, Header);
+    requestInsertArquivo.input('Chave', sql.NVarChar, Chave);
+    requestInsertArquivo.input('Ativo', sql.Int, Ativo); // Bit
+    requestInsertArquivo.input('NomeCampoData', sql.NVarChar, nomeCampoData);
 
-    // Define os parâmetros da query
-    request.input('IdExtensaoArquivo', sql.Int, IdExtensaoArquivo);
-    request.input('Encoding', sql.NVarChar, Encoding);
-    request.input('IsHeader', sql.Bit, IsHeader);
-    request.input('Header', sql.NVarChar, Header);
-    request.input('Chave', sql.NVarChar, Chave);
-    request.input('Ativo', sql.Int, Ativo);
-    request.input('NomeCampoData', sql.NVarChar, nomeCampoData); // Adiciona o NomeCampoData
-
-    // Executa a query e obtém o ID gerado
-    const result = await request.query(insertArquivoQuery);
+    const result = await requestInsertArquivo.query(insertArquivoQuery);
     const IdCliente_TipoArquivo = result.recordset[0].IdCliente_TipoArquivo;
     console.log('Arquivo inserido com sucesso. ID gerado:', IdCliente_TipoArquivo);
 
     // Insere as regras na tabela `tblcliente_tipoarquivo_regra`
+    // Insere as regras na tabela `tblcliente_tipoarquivo_regra`
     for (const regra of regras) {
-      const { IdRegra, TipoDeDado, Formato, DescricaoCampo, Obrigatorio, Data } = regra;
-      console.log('Processando regra:', regra);
+      const { IdRegra, IdTipoDeDado, Formato, DescricaoCampo, Obrigatorio } = regra; // <--- Extraction
 
-      // Cria uma nova instância de `sql.Request` para cada regra
-      const regraRequest = new sql.Request();
+      console.log('Processando regra para cadastro:', regra); // <--- Good log
 
+      const regraRequest = new sql.Request(transaction); // Nova request dentro do loop
       const insertRegraQuery = `
-        INSERT INTO tblcliente_tipoarquivo_regra 
-        (IdCliente_TipoArquivo, IdRegra, IdTipoDeDado,Formato, DescricaoCampo, Obrigatorio,DataInsercao) 
-        VALUES (@IdCliente_TipoArquivo, @IdRegra, @TipoDeDado,@Formato, @DescricaoCampo, @Obrigatorio, GETDATE());
+        INSERT INTO tblcliente_tipoarquivo_regra
+        (IdCliente_TipoArquivo, IdRegra, IdTipoDeDado, Formato, DescricaoCampo, Obrigatorio, DataInsercao)
+        VALUES (@IdCliente_TipoArquivo, @IdRegra, @IdTipoDeDado, @Formato, @DescricaoCampo, @Obrigatorio, GETDATE());
       `;
-
-      // Define os parâmetros da query
       regraRequest.input('IdCliente_TipoArquivo', sql.Int, IdCliente_TipoArquivo);
       regraRequest.input('IdRegra', sql.Int, IdRegra);
-      regraRequest.input('TipoDeDado', sql.Int, TipoDeDado); // Usa o valor exato digitado pelo usuário
-      regraRequest.input('Formato', sql.VarChar, Formato);
+      regraRequest.input('IdTipoDeDado', sql.Int, IdTipoDeDado);
+      regraRequest.input('Formato', sql.VarChar, Formato || null); // Permite nulo
       regraRequest.input('DescricaoCampo', sql.NVarChar, DescricaoCampo);
-      regraRequest.input('Obrigatorio', sql.Bit, Obrigatorio);
+      regraRequest.input('Obrigatorio', sql.Bit, Obrigatorio); // Bit
 
-      // Executa a query
       await regraRequest.query(insertRegraQuery);
-      console.log('Regra inserida com sucesso:', regra);
+      console.log('Regra inserida com sucesso no cadastro:', regra); // <--- Good log
     }
 
-    console.log('Todas as regras foram inseridas com sucesso.');
-    // Redireciona para a página de arquivos
+
+    await transaction.commit();
+    console.log('Transação de cadastro concluída com sucesso.');
     res.redirect('/arquivo');
+
   } catch (err) {
     console.error('Erro ao cadastrar arquivo:', err.message);
     console.error('Stack trace:', err.stack);
-    res.status(500).send('Erro ao cadastrar arquivo');
+     if (transaction._active) { // Verifica se a transação está ativa
+      console.log("Erro detectado no cadastro, iniciando rollback da transação.");
+      await transaction.rollback();
+      console.log("Rollback do cadastro concluído.");
+    } else {
+        console.log("Erro detectado no cadastro, mas transação não está ativa para rollback.");
+    }
+    res.status(500).send(`Erro ao cadastrar arquivo: ${err.message}`);
   } finally {
-    await closeConnection();
+    await closeConnection(req, res); // Passa req, res
   }
 });
 
-// Rota para buscar dados das regras
+
+// --- Rota GET /tipos (sem alterações) ---
 router.get('/tipos', connectToDatabase, async (req, res) => {
   try {
-    const request = new sql.Request();
-    const result = await request.query('SELECT [IdTipoDeDados],[TipoDeDado],[TipoSqlConvert],[TipoValidacao],[Ativo] FROM tbltipodedados');
+    const request = new sql.Request(req.db); // Usa a conexão do request
+    const result = await request.query('SELECT [IdTipoDeDados],[TipoDeDado],[TipoSqlConvert],[TipoValidacao],[Ativo] FROM tbltipodedados WHERE Ativo = 1'); // Filtra ativos
     res.json(result.recordset);
   } catch (err) {
     console.error('Erro ao buscar tipo de dados:', err.message);
     res.status(500).send('Erro ao buscar tipo de dados');
   } finally {
-    await closeConnection();
+    await closeConnection(req, res); // Passa req, res
   }
 });
 

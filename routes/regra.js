@@ -100,7 +100,7 @@ router.get('/editarRegra/:idRegra', connectToDatabase, async (req, res) => {
       <meta name="description" content="">
       <meta name="author" content="">
       <link rel="icon" type="image/png" sizes="16x16" href="../plugins/images/favicon.png">
-      <title>Ample Admin Template - The Ultimate Multipurpose admin template</title>
+      <title>Editar Regra - Arker Data Admin</title>
       <link href="../bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
       <link href="../plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.css" rel="stylesheet">
       <link href="../plugins/bower_components/toast-master/css/jquery.toast.css" rel="stylesheet">
@@ -133,23 +133,25 @@ router.get('/editarRegra/:idRegra', connectToDatabase, async (req, res) => {
               </div>
           </nav>
   
-          <div class="navbar-default sidebar" role="navigation">
-              <div class="sidebar-nav slimscrollsidebar">
-                  <div class="sidebar-head">
-                      <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu">Navigation</span></h3>
-                  </div>
-                  <ul class="nav" id="side-menu">
-                      <li> <a class="waves-effect active"><i class="mdi mdi-table fa-fw"></i> <span class="hide-menu">Tabelas<span class="fa arrow"></span></span></a>
-                          <ul class="nav nav-second-level">
-                              <li><a href="/cliente"><i class="ti-user fa-fw"></i><span class="hide-menu">Cliente</span></a></li>
-                              <li><a href="/tipoarquivo"><i class="ti-file fa-fw"></i><span class="hide-menu">Tipo Arquivo</span></a></li>
-                              <li><a href="/extensao"><i class="ti-file fa-fw"></i><span class="hide-menu">Extensão</span></a></li>
-                              <li><a href="/arquivo"><i class="ti-file fa-fw"></i><span class="hide-menu">Arquivo</span></a></li>
-                          </ul>
-                      </li>   
-                  </ul>
-              </div>
-          </div>
+<div class="navbar-default sidebar" role="navigation">
+            <div class="sidebar-nav slimscrollsidebar">
+                <div class="sidebar-head">
+                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu"></span></h3>
+                </div>
+                <ul class="nav" id="side-menu">
+                    <li><a href="/dash"><i class="mdi mdi-chart-bar"></i><span class="hide-menu"> Dashboard</span></a></li>
+                    <li> <a class="waves-effect active"><i class="mdi mdi-table fa-fw"></i> <span class="hide-menu">Tabelas<span class="fa arrow"></span></span></a>
+                        <ul class="nav nav-second-level">
+                            <li><a href="/cliente"><i class="ti-user fa-fw"></i><span class="hide-menu">Cliente</span></a></li>
+                            <li><a href="/tipoarquivo"><i class="ti-files fa-fw"></i><span class="hide-menu">Tipo Arquivo</span></a></li>
+                            <li><a href="/extensao"><i class="ti-file fa-fw"></i><span class="hide-menu">Extensão</span></a></li>
+                            <li><a href="/regra"><i class="ti-key fa-fw"></i><span class="hide-menu">Regra</span></a></li>
+                            <li><a href="/arquivo"><i class="ti-file fa-fw"></i><span class="hide-menu">Arquivo</span></a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
   
           <div id="page-wrapper">
               <div class="container-fluid">
@@ -177,14 +179,9 @@ router.get('/editarRegra/:idRegra', connectToDatabase, async (req, res) => {
                                     <label>Id da Regra</label>
                                     <input type="text" class="form-control" id="IdRegra" name="IdRegra" value="${regra.IdRegra}" readonly>
                                   </div>
-  
-                                    <div class="form-group">
-                                      <label for="regra">Nome da Regra</label>
-                                      <input type="text" class="form-control" id="regra" name="regra" value="${regra.Regra}" readonly required>
-                                    </div>
                                     <div class="form-group">
                                       <label for="regraNovo">Nome Novo da Regra</label>
-                                      <input type="text" class="form-control" id="regraNovo" name="regraNovo">
+                                      <input type="text" class="form-control" id="regraNovo" name="regraNovo" value="${regra.Regra}" required>
                                     </div>
                                     <div class="form-group">
                                       <label for="Descricao">Descrição da Regra</label>
@@ -206,7 +203,7 @@ router.get('/editarRegra/:idRegra', connectToDatabase, async (req, res) => {
                   </div>
               </div>
   
-              <footer class="footer text-center"> 2017 &copy; Ample Admin brought to you by themedesigner.in </footer>
+              <footer class="footer text-center"> 2025 &copy; Arker  - arker.com.br  </footer>
           </div>
       </div>
   
@@ -307,6 +304,7 @@ router.get('/regrasarquivos', connectToDatabase, async (req, res) => {
         rg.[Regra],  -- Nome da regra, vindo da tabela tblregra
         td.[TipoDeDado],
         r.[DescricaoCampo],
+        r.[Formato],
         r.[Obrigatorio],
         r.[DataInsercao],
         r.[DataAlteracao]

@@ -8,7 +8,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="icon" type="image/png" sizes="16x16" href="/plugins/images/favicon.png">
-    <title>Ample Admin Template - The Ultimate Multipurpose admin template</title>
+    <title>Arquivo - Arker Data Admin</title> <!-- Changed Title -->
     <!-- Bootstrap Core CSS -->
     <link href="bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Menu CSS -->
@@ -29,6 +29,12 @@
     <link href="css/edit.css" rel="stylesheet">
     <!-- color CSS -->
     <link href="css/colors/gray-dark.css" id="theme" rel="stylesheet">
+    <style>
+        /* Style to allow line breaks within the span */
+        .font-medium br {
+            line-height: 1.5; /* Adjust spacing between lines if needed */
+        }
+    </style>
 </head>
 
 <body class="fix-header">
@@ -36,10 +42,6 @@
         <div class="loading-screen" id="loadingScreen">
             <div class="loading-spinner"></div>
         </div>
-    <!-- ============================================================== -->
-    <!-- Preloader -->
-    <!-- ============================================================== -->
-
     <!-- ============================================================== -->
     <!-- Wrapper -->
     <!-- ============================================================== -->
@@ -65,9 +67,10 @@
         <div class="navbar-default sidebar" role="navigation">
             <div class="sidebar-nav slimscrollsidebar">
                 <div class="sidebar-head">
-                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu">Navigation</span></h3>
+                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu"></span></h3>
                 </div>
                 <ul class="nav" id="side-menu">
+                    <li><a href="/dash"><i class="mdi mdi-chart-bar"></i><span class="hide-menu"> Dashboard</span></a></li>
                     <li> <a class="waves-effect active"><i class="mdi mdi-table fa-fw"></i> <span class="hide-menu">Tabelas<span class="fa arrow"></span></span></a>
                         <ul class="nav nav-second-level">
                             <li><a href="/cliente"><i class="ti-user fa-fw"></i><span class="hide-menu">Cliente</span></a></li>
@@ -76,7 +79,7 @@
                             <li><a href="/regra"><i class="ti-key fa-fw"></i><span class="hide-menu">Regra</span></a></li>
                             <li><a href="/arquivo"><i class="ti-file fa-fw"></i><span class="hide-menu">Arquivo</span></a></li>
                         </ul>
-                    </li>   
+                    </li>
                 </ul>
             </div>
         </div>
@@ -88,18 +91,18 @@
             <div class="container-fluid">
                 <div class="row bg-title">
                     <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
-                        <h4 class="page-title">Arquivos </h4>
+                        <h4 class="page-title">Arquivos</h4> <!-- Changed Title -->
                     </div>
                     <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
                         <ol class="breadcrumb">
-                            <li>Tabelas</a></li>
-                            <li class="active">Regras</li>
+                            <li>Tabelas</li>
+                            <li class="active">Arquivos</li> <!-- Changed Breadcrumb -->
                         </ol>
                     </div>
                 </div>
 
                 <!-- ============================================================== -->
-                <!-- Cadastro Cliente -->
+                <!-- Tabela Arquivo -->
                 <!-- ============================================================== -->
                 <div class="row">
                     <div class="col-sm-12">
@@ -126,42 +129,18 @@
                                             <th>Gerenciar</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="clientesTable">
-                                        <!-- A tabela será preenchida dinamicamente com os dados dos clientes -->
+                                    <tbody id="arquivosTable"> <!-- Changed ID -->
+                                        <!-- A tabela será preenchida dinamicamente com os dados dos arquivos -->
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-sm-12">
-                        <div class="panel">
-                            <div class="panel-heading">
-                                TABELA REGRA
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-hover manage-u-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Id Arquivo</th>
-                                            <th>Regra</th>
-                                            <th>Tipo De Dado</th>
-                                            <th>Descrição</th>
-                                            <th>Obrigatorio</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="regraarquivoTable">
-                                        <!-- A tabela será preenchida dinamicamente com os dados dos clientes -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <!-- REMOVED THE SECOND PANEL FOR REGRA TABLE -->
             </div>
 
-            <footer class="footer text-center"> 2017 &copy; Ample Admin brought to you by themedesigner.in </footer>
+            <footer class="footer text-center"> 2025 &copy; Arker - arker.com.br </footer> <!-- Updated Footer -->
         </div>
     </div>
 
@@ -187,119 +166,34 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
     <script>
-        // Função que será chamada ao clicar no botão de lupa
-async function selectCliente(idClienteTipoArquivo) {
-    const loadingScreen = document.getElementById('loadingScreen');
-    loadingScreen.style.display = 'flex'; // Exibe a tela de carregamento
-
-    try {
-        // Busca as regras dos arquivos
-        const response = await fetch('/regrasarquivos');
-        const arquivosregras = await response.json();
-        // Filtra as regras para o id específico
-
-        const regraEspecifica = arquivosregras.filter(arquivoregra => {
-    // Verifica o tipo antes da comparação
-    if (typeof arquivoregra.IdCliente_TipoArquivo === 'string' && typeof idClienteTipoArquivo === 'string') {
-        return arquivoregra.IdCliente_TipoArquivo === idClienteTipoArquivo;
-    }
-    // Caso seja número, converte para garantir a comparação correta
-    return Number(arquivoregra.IdCliente_TipoArquivo) === Number(idClienteTipoArquivo);
-});
-
-
-
-
-        
-        
-
-        // Exibe apenas a regra específica
-        const tableBody = document.getElementById('regraarquivoTable');
-        tableBody.innerHTML = ''; // Limpa a tabela antes de adicionar os novos dados
-
-        const fragment = document.createDocumentFragment(); // Cria um fragmento de documento
-
-        // Verifica se encontrou alguma regra
-        if (regraEspecifica.length > 0) {
-            regraEspecifica.forEach(arquivoregra => {
-                const obrigatorio = arquivoregra.Obrigatorio === true ? 'Sim' : 'Não';
-    
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><span class="font-medium">${arquivoregra.IdCliente_TipoArquivo}</span></td>
-                    <td><span class="font-medium">${arquivoregra.Regra}</span></td>
-                    <td><span class="font-medium">${arquivoregra.TipoDeDado}</span></td>
-                    <td><span class="font-medium">${arquivoregra.DescricaoCampo}</span></td>
-                    <td>${obrigatorio}</td>
-                `;
-                fragment.appendChild(row); // Adiciona a linha ao fragmento
-            });
-    
-            tableBody.appendChild(fragment); // Adiciona todo o fragmento de uma vez
-        } else {
-            // Caso não encontre nenhuma regra para o id, exibe uma mensagem
-            const row = document.createElement('tr');
-            row.innerHTML = `<td colspan="5" class="text-center">Nenhuma regra encontrada para este arquivo.</td>`;
-            fragment.appendChild(row);
-            tableBody.appendChild(fragment);
+        // Function to navigate to the details page (campos.html)
+        function verCampos(arquivoId) {
+            window.location.href = `/campos?arquivoId=${arquivoId}`;
         }
 
-    } catch (error) {
-        console.error('Erro ao buscar arquivos regra:', error);
-    } finally {
-        loadingScreen.style.display = 'none'; // Oculta a tela de carregamento
-    }
-}
-
-        async function buscarRegra() {
-            const loadingScreen = document.getElementById('loadingScreen');
-            loadingScreen.style.display = 'flex'; // Exibe a tela de carregamento
+        // Function to fetch and display the list of files (arquivos)
+        async function buscarArquivos() {
+          const loadingScreen = document.getElementById('loadingScreen');
+          loadingScreen.style.display = 'flex'; // Show loading screen
           try {
-            const response = await fetch('/regrasarquivos');
-            const arquivosregras = await response.json();
-        
-            const tableBody = document.getElementById('regraarquivoTable');
-            tableBody.innerHTML = ''; // Limpa a tabela antes de adicionar os novos dados
-        
-            const fragment = document.createDocumentFragment(); // Cria um fragmento de documento
-        
-            arquivosregras.forEach(arquivoregra => {
-              const obrigatorio = arquivoregra.Obrigatorio === true ? 'Sim' : 'Não';
-        
-              const row = document.createElement('tr');
-              row.innerHTML = `
-                <td><span class="font-medium">${arquivoregra.IdCliente_TipoArquivo}</span></td>
-                <td><span class="font-medium">${arquivoregra.Regra}</span></td>
-                <td><span class="font-medium">${arquivoregra.TipoDeDado}</span></td>
-                <td><span class="font-medium">${arquivoregra.DescricaoCampo}</span></td>
-                <td>${obrigatorio}</td>
-              `;
-              fragment.appendChild(row); // Adiciona a linha ao fragmento
-            });
-        
-            tableBody.appendChild(fragment); // Adiciona todo o fragmento de uma vez
-        
-          } catch (error) {
-            console.error('Erro ao buscar arquivos regra:', error);
-          }finally {
-                loadingScreen.style.display = 'none'; // Oculta a tela de carregamento
+            const response = await fetch('/arquivos'); // Endpoint to get all files
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        }
-        
-        async function buscarClientes() {
-          try {
-            const response = await fetch('/arquivos');
             const arquivos = await response.json();
-        
-            const tableBody = document.getElementById('clientesTable');
-            tableBody.innerHTML = ''; // Limpa a tabela antes de adicionar os novos dados
-        
-            const fragment = document.createDocumentFragment(); // Cria um fragmento de documento
-        
+
+            const tableBody = document.getElementById('arquivosTable'); // Target the correct table body
+            tableBody.innerHTML = ''; // Clear the table before adding new data
+
+            const fragment = document.createDocumentFragment(); // Use fragment for performance
+
             arquivos.forEach(arquivo => {
               const ativo = arquivo.Ativo === true ? 'Sim' : 'Não';
-              const IsHeader = arquivo.IsHeader === true ? 'Sim' : 'Não';
-        
+              const isHeader = arquivo.IsHeader === true ? 'Sim' : 'Não'; // Corrected variable name
+              // Format the header string by replacing commas with <br> tags
+              const headerFormatted = arquivo.Header ? arquivo.Header.split(',').join('<br>') : '';
+
+
               const row = document.createElement('tr');
               row.innerHTML = `
                 <td><span class="font-medium">${arquivo.IdCliente_TipoArquivo}</span></td>
@@ -307,125 +201,96 @@ async function selectCliente(idClienteTipoArquivo) {
                 <td><span class="font-medium">${arquivo.TipoArquivo}</span></td>
                 <td><span class="font-medium">${arquivo.ExtensaoArquivo}</span></td>
                 <td><span class="font-medium">${arquivo.Encoding}</span></td>
-                <td><span class="font-medium">${IsHeader}</span></td>
-                <td><span class="font-medium">${arquivo.Header}</span></td>
+                <td><span class="font-medium">${isHeader}</span></td>
+                <td><span class="font-medium">${headerFormatted}</span></td> <!-- Use the formatted header -->
                 <td><span class="font-medium">${arquivo.Chave}</span></td>
                 <td>${ativo}</td>
                 <td>
-                    <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="editClient('${arquivo.IdCliente_TipoArquivo}')">
-                    <i class="ti-pencil-alt"></i>
+                    <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="verCampos('${arquivo.IdCliente_TipoArquivo}')" title="Ver Campos/Regras">
+                        <i class="ti-search"></i>
                     </button>
-                    <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="selectCliente('${arquivo.IdCliente_TipoArquivo}')">
-                    <i class="ti-search"></i>
+                    <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="editArquivo('${arquivo.IdCliente_TipoArquivo}')" title="Editar Arquivo">
+                        <i class="ti-pencil-alt"></i>
                     </button>
-                    <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="deactivateClient('${arquivo.IdCliente_TipoArquivo}')">
-                    <i class="icon-trash"></i>
+                    <button type="button" class="btn btn-info btn-outline btn-circle btn-lg m-r-5" onclick="deactivateArquivo('${arquivo.IdCliente_TipoArquivo}')" title="Desativar Arquivo">
+                        <i class="icon-trash"></i>
                     </button>
-
                 </td>
               `;
-              fragment.appendChild(row); // Adiciona a linha ao fragmento
+              fragment.appendChild(row); // Add the row to the fragment
             });
-        
-            tableBody.appendChild(fragment); // Adiciona todo o fragmento de uma vez
-        
+
+            tableBody.appendChild(fragment); // Add the fragment to the table body once
+
           } catch (error) {
             console.error('Erro ao buscar arquivos:', error);
-          }finally {
-                loadingScreen.style.display = 'none'; // Oculta a tela de carregamento
+            // Optionally display an error message in the table
+            const tableBody = document.getElementById('arquivosTable');
+            tableBody.innerHTML = `<tr><td colspan="10" class="text-center text-danger">Erro ao carregar arquivos. Tente novamente</td></tr>`;
+          } finally {
+                loadingScreen.style.display = 'none'; // Hide loading screen
             }
         }
-        
-        function editClient(clientName) {
-            // Redireciona para a página de edição, passando o nome do cliente na URL
-            window.location.href = `/editarArquivo/${clientName}`;
-        }
-        
-// Função para deletar arquivo
-async function deactivateClient(clientName) {
-    try {
-        // Exibe o alerta de confirmação
-        const result = await Swal.fire({
-            title: 'Tem certeza?',
-            text: "Você não poderá reverter essa ação!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Sim, deletar!',
-            cancelButtonText: 'Cancelar'
-        });
 
-        // Se o usuário confirmar, realiza a desativação
-        if (result.isConfirmed) {
-            const response = await fetch(`/desativarArquivo/${clientName}`, {
-                method: 'PATCH',
-            });
-                window.location.href = '/arquivo';
+        // Function to redirect to the edit page
+        function editArquivo(arquivoId) {
+            window.location.href = `/editarArquivo/${arquivoId}`;
         }
-    } catch (error) {
-        console.error('Erro ao desativar regra:', error);
-        Swal.fire(
-            'Erro!',
-            'Ocorreu um erro inesperado.',
-            'error'
-        );
-    }
-}
-        
-        // Carrega as funções quando a página estiver pronta
-        document.addEventListener("DOMContentLoaded", async function () {
+
+        // Function to deactivate/delete a file
+        async function deactivateArquivo(arquivoId) {
             try {
-                await buscarClientes();
-                await buscarRegra();
-        
-                const response = await fetch("/arquivos");
-                const data = await response.json();
-        
-                // Criar Map para armazenar clientes únicos e os tipos de arquivo associados
-                const clientesUnicos = new Map();
-        
-                data.forEach(item => {
-                    if (!clientesUnicos.has(item.IdCliente)) {
-                        clientesUnicos.set(item.IdCliente, { nome: item.Cliente, tipos: [] });
-                    }
-                    clientesUnicos.get(item.IdCliente).tipos.push({ id: item.IdTipoArquivo, nome: item.TipoArquivo });
+                // Show confirmation dialog
+                const result = await Swal.fire({
+                    title: 'Tem certeza?',
+                    text: "Você não poderá reverter essa ação!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sim, desativar!', // Changed text for clarity
+                    cancelButtonText: 'Cancelar'
                 });
-        
-                const selectCliente = document.getElementById("cliente");
-                const selectTipoArquivo = document.getElementById("tipoArquivo");
-        
-                // Adicionar opções ao select de Cliente
-                clientesUnicos.forEach((info, IdCliente) => {
-                    const option = document.createElement("option");
-                    option.value = IdCliente;
-                    option.textContent = info.nome;
-                    selectCliente.appendChild(option);
-                });
-        
-                // Atualizar os tipos de arquivo quando um cliente for selecionado
-                selectCliente.addEventListener("change", function () {
-                    selectTipoArquivo.innerHTML = '<option value="">Selecione um Tipo de Arquivo</option>';
-                    const clienteId = this.value;
-        
-                    if (clienteId && clientesUnicos.has(parseInt(clienteId))) {
-                        clientesUnicos.get(parseInt(clienteId)).tipos.forEach(tipo => {
-                            const option = document.createElement("option");
-                            option.value = tipo.id;
-                            option.textContent = tipo.nome;
-                            selectTipoArquivo.appendChild(option);
-                        });
-                    }
-                });
-        
-            } catch (error) {
-                console.error("Erro ao buscar clientes:", error);
-            }
-        });
-        </script>
-        
-        
-        
-</body>
 
+                // If user confirms, proceed with deactivation
+                if (result.isConfirmed) {
+                    const response = await fetch(`/desativarArquivo/${arquivoId}`, { // Ensure this endpoint matches your backend
+                        method: 'PATCH', // Or DELETE, depending on your backend logic
+                    });
+
+                    if (!response.ok) {
+                         // Try to get error message from backend response
+                         let errorMsg = 'Falha ao desativar o arquivo.';
+                         try {
+                             const errorData = await response.json();
+                             errorMsg = errorData.message || errorMsg;
+                         } catch (e) { /* Ignore parsing error */ }
+                         throw new Error(errorMsg);
+                    }
+
+                    // Success message and reload the list
+                    await Swal.fire(
+                        'Desativado!',
+                        'O arquivo foi desativado.',
+                        'success'
+                    );
+                    buscarArquivos(); // Reload the table data
+                    // Or redirect: window.location.href = '/arquivo';
+                }
+            } catch (error) {
+                console.error('Erro ao desativar arquivo:', error);
+                Swal.fire(
+                    'Erro!',
+                    error.message || 'Ocorreu um erro inesperado ao desativar o arquivo.',
+                    'error'
+                );
+            }
+        }
+
+        // Load the file list when the page is ready
+        document.addEventListener("DOMContentLoaded", buscarArquivos);
+
+    </script>
+
+</body>
 </html>

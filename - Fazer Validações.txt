@@ -1,37 +1,63 @@
-Cliente(Responsavel):
+Cliente:
+Nome da pg - 
+Footer - 
+Header - 
+C - 
+R - 
+U - 
+D - 
+
+Responsavel:
+Nome da pg - 
+Footer - 
+Header - 
 C - 
 R - 
 U - 
 D - 
 
 Tipo Arquivo:
-C - OK
-R - OK
-U - OK
-D - OK
+Nome da pg - 
+Footer - 
+Header - 
+C - 
+R - 
+U - 
+D - 
+Posso ter 2 faturamento?
+
 
 Extensão:
-C - OK
-R - OK
-U - OK
-D - OK
+Nome da pg - 
+Footer - 
+Header - 
+C - 
+R - 
+U - 
+D - 
+Posso ter 2 .csv?
 
 Regra:
-C - OK
-R - OK
-U - OK
-D - OK
+Nome da pg - 
+Footer - 
+Header - 
+C - 
+R - 
+U - 
+D - 
 
 Arquivo:
+Nome da pg - 
+Footer - 
+Header - 
 C - 
-R - OK
+R - 
 U - 
 D - 
 
 
 
-http://localhost:3001/cliente:
-filtro de ordernar pelo nome
+
 
 http://localhost:3001/cadastroarquivo:
 Validar se chave existe em header

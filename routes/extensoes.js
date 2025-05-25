@@ -100,7 +100,7 @@ router.get('/editarExtensao/:idExtensao', connectToDatabase, async (req, res) =>
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="icon" type="image/png" sizes="16x16" href="../plugins/images/favicon.png">
-    <title>Ample Admin Template - The Ultimate Multipurpose admin template</title>
+    <title>Editar Extensão - Arker Data Admin</title>
     <link href="../bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.css" rel="stylesheet">
     <link href="../plugins/bower_components/toast-master/css/jquery.toast.css" rel="stylesheet">
@@ -136,17 +136,19 @@ router.get('/editarExtensao/:idExtensao', connectToDatabase, async (req, res) =>
         <div class="navbar-default sidebar" role="navigation">
             <div class="sidebar-nav slimscrollsidebar">
                 <div class="sidebar-head">
-                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu">Navigation</span></h3>
+                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu"></span></h3>
                 </div>
                 <ul class="nav" id="side-menu">
+                    <li><a href="/dash"><i class="mdi mdi-chart-bar"></i><span class="hide-menu"> Dashboard</span></a></li>
                     <li> <a class="waves-effect active"><i class="mdi mdi-table fa-fw"></i> <span class="hide-menu">Tabelas<span class="fa arrow"></span></span></a>
                         <ul class="nav nav-second-level">
                             <li><a href="/cliente"><i class="ti-user fa-fw"></i><span class="hide-menu">Cliente</span></a></li>
-                            <li><a href="/tipoarquivo"><i class="ti-file fa-fw"></i><span class="hide-menu">Tipo Arquivo</span></a></li>
+                            <li><a href="/tipoarquivo"><i class="ti-files fa-fw"></i><span class="hide-menu">Tipo Arquivo</span></a></li>
                             <li><a href="/extensao"><i class="ti-file fa-fw"></i><span class="hide-menu">Extensão</span></a></li>
+                            <li><a href="/regra"><i class="ti-key fa-fw"></i><span class="hide-menu">Regra</span></a></li>
                             <li><a href="/arquivo"><i class="ti-file fa-fw"></i><span class="hide-menu">Arquivo</span></a></li>
                         </ul>
-                    </li>   
+                    </li>
                 </ul>
             </div>
         </div>
@@ -179,13 +181,8 @@ router.get('/editarExtensao/:idExtensao', connectToDatabase, async (req, res) =>
                                 </div>
 
                                   <div class="form-group">
-                                  
-                                    <label for="extensao">Nome da Extensao</label>
-                                    <input type="text" class="form-control" id="extensao" name="extensao" value="${extensao.ExtensaoArquivo}" readonly required>
-                                  </div>
-                                  <div class="form-group">
-                                    <label for="extensaoNovo">Nome Novo da Extensão</label>
-                                    <input type="text" class="form-control" id="extensaoNovo" name="extensaoNovo">
+                                    <label for="extensaoNovo">Nome da Extensão</label>
+                                    <input type="text" class="form-control" id="extensaoNovo" name="extensaoNovo" value="${extensao.ExtensaoArquivo}" required>
                                   </div>
                                   <div class="form-group">
                                     <label for="ativo">Ativo</label>
@@ -203,7 +200,7 @@ router.get('/editarExtensao/:idExtensao', connectToDatabase, async (req, res) =>
                 </div>
             </div>
 
-            <footer class="footer text-center"> 2017 &copy; Ample Admin brought to you by themedesigner.in </footer>
+            <footer class="footer text-center"> 2025 &copy; Arker  - arker.com.br  </footer>
         </div>
     </div>
 

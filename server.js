@@ -2,10 +2,11 @@
 const express = require('express');
 const path = require('path');
 const app = express();
-const port = 3001;
+const port = 3000;
 
 // Importando as rotas
 const clienteRoutes = require('./routes/cliente');
+const dashboardRoutes = require('./routes/dashboard');
 const extensaoRoutes = require('./routes/extensoes');
 const tipoarquivoRoutes = require('./routes/tipoarquivo');
 const regraRoutes = require('./routes/regra');
@@ -27,7 +28,19 @@ app.get('/500', (req, res) => {
 
 // Servindo os arquivos HTML
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'clientes.html'));
+  res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
+
+app.get('/dash', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
+
+app.get('/campos', (req, res) => {
+  res.sendFile(path.join(__dirname, 'campos.html'));
+});
+
+app.get('/monitoramento', (req, res) => {
+  res.sendFile(path.join(__dirname, 'monitoramento.html'));
 });
 
 // Rota para exibir o formulário cliente.html
@@ -89,6 +102,8 @@ app.get('/cadastrotipodearquivo', (req, res) => {
 
 // Usando as rotas da API
 app.use(clienteRoutes); // Usando as rotas de clientes importadas de routes/cliente.js
+
+app.use(dashboardRoutes); // Usando as rotas de clientes importadas de routes/cliente.js
 
 app.use(extensaoRoutes); // Usando as rotas de clientes importadas de routes/extensao.js
 

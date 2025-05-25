@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" type="image/png" sizes="16x16" href="/plugins/images/favicon.png">
+    <title>Dashboard - Arker Data Admin</title>
+    <link href="bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.css" rel="stylesheet">
+    <link href="/plugins/bower_components/toast-master/css/jquery.toast.css" rel="stylesheet">
+    <link href="/plugins/bower_components/morrisjs/morris.css" rel="stylesheet">
+    <link href="/plugins/bower_components/chartist-js/dist/chartist.min.css" rel="stylesheet">
+    <link href="/plugins/bower_components/chartist-plugin-tooltip-master/dist/chartist-plugin-tooltip.css" rel="stylesheet">
+    <link href="/plugins/bower_components/calendar/dist/fullcalendar.css" rel="stylesheet" />
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/edit.css" rel="stylesheet">
+    <link href="css/colors/gray-dark.css" id="theme" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Existing styles */
+        .filter-icon {
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .search-input {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 5px 10px;
+            padding-left: 30px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="gray" class="bi bi-search" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: 5px center;
+            background-size: 16px;
+            margin-left: 20px;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination li {
+            list-style: none;
+            margin: 0 5px;
+        }
+
+        .pagination a {
+            border: 1px solid #ccc;
+            padding: 5px 10px;
+            text-decoration: none;
+            color: #333;
+            border-radius: 4px;
+        }
+
+        /* Added styles for loading screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9); /* Slightly transparent white */
+            display: flex; /* Use flexbox to center the spinner */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* Ensure it's on top */
+            /* Initially visible */
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+    </style>
+
+</head>
+
+<body class="fix-header">
+    <!-- Added Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+    </div>
+    <!-- Standard Preloader (from template) -->
+    <div class="preloader">
+        <svg class="circular" viewBox="25 25 50 50">
+            <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" />
+        </svg>
+    </div>
+    <div id="wrapper">
+        <nav class="navbar navbar-default navbar-static-top m-b-0">
+            <div class="navbar-header">
+                <div class="top-left-part">
+                    <a class="logo" href="index.html">
+                        <span class="hidden-xs">
+                            <img src="/plugins/images/logo.webp" alt="home" class="dark-logo" width="200px">
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+        <div class="navbar-default sidebar" role="navigation">
+            <div class="sidebar-nav slimscrollsidebar">
+                <div class="sidebar-head">
+                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu"></span></h3>
+                </div>
+                <ul class="nav" id="side-menu">
+                    <li><a href="/dash" class="active"><i class="mdi mdi-chart-bar "></i><span class="hide-menu"> Dashboard</span></a></li>
+                    <li> <a><i class="mdi mdi-table fa-fw"></i> <span class="hide-menu">Tabelas<span class="fa arrow"></span></span></a>
+                        <ul class="nav nav-second-level">
+                            <li><a href="/cliente"><i class="ti-user fa-fw"></i><span class="hide-menu">Cliente</span></a></li>
+                            <li><a href="/tipoarquivo"><i class="ti-files fa-fw"></i><span class="hide-menu">Tipo Arquivo</span></a></li>
+                            <li><a href="/extensao"><i class="ti-file fa-fw"></i><span class="hide-menu">Extensão</span></a></li>
+                            <li><a href="/regra"><i class="ti-key fa-fw"></i><span class="hide-menu">Regra</span></a></li>
+                            <li><a href="/arquivo"><i class="ti-file fa-fw"></i><span class="hide-menu">Arquivo</span></a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="page-wrapper">
+            <div class="container-fluid">
+                <div class="row bg-title">
+                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                        <h4 class="page-title">Dashboard</h4>
+                    </div>
+                    <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
+                        <ol class="breadcrumb">
+                            <li><a href="#">Dashboard</a></li>
+                            <li></li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="panel" id="painelpbi">
+                            <!-- Content will be loaded here by JS -->
+                            <div class="panel-heading">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="panel">
+                            <div class="panel-heading" style="display: block;justify-content: space-between;">
+                                <div style="display: block; width: 100%;" class="m-b-10 b-b">
+                                        <div class="search-container">
+                                            Carga De Dados
+                                        </div>
+                                        <div>
+                                            <h5 class="text-muted m-t-10">Ultima Verificação:</h5>
+                                        </div>
+                                        <div class="col-sm-12 col-sm-12 p-l-0">
+                                            <ul class="expense-box">
+                                                <li class ="p-l-0"><i class="ti-alert text-warning p-l-0" style="width: 40px;height: 40px;"></i>
+                                                    <div>
+                                                        <h4>Degraded</h4>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <h5 class="text-muted m-t-10">07/04/2025</h5>
+                                        </div>
+                                        <div>
+                                            <h5 class="text-muted m-t-10">18:24:47</h5>
+                                        </div>
+                                </div>
+                                <div style="display: block; width: 100%;" class="m-t-10">
+                                    <li style="list-style: none;">
+                                        <span class="label label-success" style="border-radius: 5px;">
+                                            <i class="ti-check text-light p-l-0"></i>  24 Health
+                                        </span>
+                                    </li>
+                                    <li style="list-style: none;" class="m-t-10">
+                                        <span class="label label-warning" style="border-radius: 5px;">
+                                            <i class="ti-alert text-light p-l-0"></i>  148 Degraded
+                                        </span>
+                                    </li>
+                                    <li style="list-style: none;" class="m-t-10">
+                                        <span class="label label-danger" style="border-radius: 5px;">
+                                            <i class="ti-close text-light p-l-0"></i>  0 Unhealthy
+                                        <span>
+                                    </li>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="panel">
+                            <div class="panel-heading" style="display: block;justify-content: space-between;">
+                                <div style="display: block; width: 100%;" class="m-b-10 b-b">
+                                        <div class="search-container">
+                                            ???
+                                        </div>
+                                        <div>
+                                            <h5 class="text-muted m-t-10">Ultima Verificação:</h5>
+                                        </div>
+                                        <div class="col-sm-12 col-sm-12 p-l-0">
+                                            <ul class="expense-box">
+                                                <li class ="p-l-0"><i class="ti-close text-danger p-l-0" style="width: 40px;height: 40px;"></i>
+                                                    <div>
+                                                        <h4>Unhealthy</h4>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <h5 class="text-muted m-t-10">07/04/2025</h5>
+                                        </div>
+                                        <div>
+                                            <h5 class="text-muted m-t-10">18:24:59</h5>
+                                        </div>
+                                </div>
+                                <div style="display: block; width: 100%;" class="m-t-10">
+                                    <li style="list-style: none;">
+                                        <span class="label label-success" style="border-radius: 5px;">
+                                            <i class="ti-check text-light p-l-0"></i>  4 Health
+                                        </span>
+                                    </li>
+                                    <li style="list-style: none;" class="m-t-10">
+                                        <span class="label label-warning" style="border-radius: 5px;">
+                                            <i class="ti-alert text-light p-l-0"></i>  0 Degraded
+                                        </span>
+                                    </li>
+                                    <li style="list-style: none;" class="m-t-10">
+                                        <span class="label label-danger" style="border-radius: 5px;">
+                                            <i class="ti-close text-light p-l-0"></i>  23 Unhealthy
+                                        <span>
+                                    </li>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="footer text-center"> 2025 &copy; Arker  - arker.com.br  </footer>
+        </div>
+    </div>
+    <script src="/plugins/bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.js"></script>
+    <script src="js/jquery.slimscroll.js"></script>
+    <script src="js/waves.js"></script>
+    <script src="/plugins/bower_components/waypoints/lib/jquery.waypoints.js"></script>
+    <script src="/plugins/bower_components/counterup/jquery.counterup.min.js"></script>
+    <script src="/plugins/bower_components/chartist-js/dist/chartist.min.js"></script>
+    <script src="/plugins/bower_components/chartist-plugin-tooltip-master/dist/chartist-plugin-tooltip.min.js"></script>
+    <script src="/plugins/bower_components/moment/moment.js"></script>
+    <script src='/plugins/bower_components/calendar/dist/fullcalendar.min.js'></script>
+    <script src="/plugins/bower_components/calendar/dist/cal-init.js"></script>
+    <script src="js/custom.min.js"></script>
+    <script src="/plugins/bower_components/toast-master/js/jquery.toast.js"></script>
+    <script src="/plugins/bower_components/styleswitcher/jQuery.style.switcher.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script>
+async function buscarDashboard() {
+    // Get the loading screen element
+    const loadingScreen = document.getElementById('loadingScreen');
+    // Ensure loading screen is visible (it should be by default via CSS)
+    loadingScreen.style.display = 'flex';
+
+    try {
+        const response = await fetch('/dashboard');
+        if (!response.ok) { // Check for HTTP errors
+             throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const dashboards = await response.json();
+
+        // Check if data is empty or not an array
+        if (!Array.isArray(dashboards) || dashboards.length === 0) {
+            throw new Error("Nenhum dado recebido do dashboard.");
+        }
+
+        // Encontra a atualização mais recente
+        const mostRecent = dashboards.reduce((latest, current) => {
+            // Basic check for valid date strings before comparing
+            const latestDate = latest && latest.DataAlteracao ? new Date(latest.DataAlteracao) : new Date(0);
+            const currentDate = current && current.DataAlteracao ? new Date(current.DataAlteracao) : new Date(0);
+            return currentDate > latestDate ? current : latest;
+        }, dashboards[0]); // Start with the first item
+
+        // Conta os status
+        const statusCounts = dashboards.reduce((counts, item) => {
+            if (item.Status === "Completed") counts.completed++;
+            if (item.Status === "Failed") counts.failed++;
+            // Add other statuses if needed (e.g., Degraded)
+            return counts;
+        }, { completed: 0, failed: 0 }); // Initialize counts
+
+        const body = document.getElementById('painelpbi');
+        // Determine overall status and icon
+        const overallStatus = statusCounts.failed > 0 ? 'Unhealthy' : 'Health';
+        const statusIconClass = statusCounts.failed > 0 ? 'ti-close text-danger' : 'ti-check text-success';
+
+        body.innerHTML = `
+            <div class="panel-heading" style="display: block;justify-content: space-between;">
+                <div style="display: block; width: 100%;" class="m-b-10 b-b">
+                    <div class="search-container">
+                        PowerBI
+                    </div>
+                    <div>
+                        <h5 class="text-muted m-t-10">Última Verificação:</h5>
+                    </div>
+                    <div class="col-sm-12 col-sm-12 p-l-0">
+                        <ul class="expense-box">
+                            <li class="p-l-0">
+                                <i class="${statusIconClass} p-l-0"
+                                   style="width: 40px;height: 40px;"></i>
+                                <div>
+                                    <h4>${overallStatus}</h4>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h5 class="text-muted m-t-10">${mostRecent && mostRecent.DataAlteracao ? formatDate(mostRecent.DataAlteracao) : 'N/A'}</h5>
+                    </div>
+                    <div>
+                        <h5 class="text-muted m-t-10">${mostRecent && mostRecent.DataAlteracao ? formatTime(mostRecent.DataAlteracao) : 'N/A'}</h5>
+                    </div>
+                </div>
+                <div style="display: block; width: 100%;" class="m-t-10">
+                    <li style="list-style: none;">
+                        <span class="label label-success" style="border-radius: 5px;">
+                            <i class="ti-check text-light p-l-0"></i> ${statusCounts.completed} Health
+                        </span>
+                    </li>
+                    <li style="list-style: none;" class="m-t-10">
+                        <span class="label label-warning" style="border-radius: 5px;">
+                            <i class="ti-alert text-light p-l-0"></i> 0 Degraded <!-- Assuming 0 for now -->
+                        </span>
+                    </li>
+                    <li style="list-style: none;" class="m-t-10">
+                        <span class="label label-danger" style="border-radius: 5px;">
+                            <i class="ti-close text-light p-l-0"></i> ${statusCounts.failed} Unhealthy
+                        </span>
+                    </li>
+                </div>
+            </div>
+        `;
+
+    } catch (error) {
+        console.error('Erro ao buscar dash:', error);
+        // Display error message in the panel
+        document.getElementById('painelpbi').innerHTML = `
+            <div class="panel-heading">
+                 <div class="alert alert-danger m-t-10">
+                     Erro ao carregar dados do PowerBI: ${error.message}
+                 </div>
+            </div>
+        `;
+    } finally {
+        // Hide the loading screen regardless of success or error
+        if (loadingScreen) {
+             loadingScreen.style.display = 'none';
+        }
+    }
+}
+
+// Funções auxiliares para formatar data e hora
+function formatDate(dateString) {
+    try {
+        const date = new Date(dateString);
+        // Check if date is valid
+        if (isNaN(date.getTime())) return 'Data inválida';
+        return date.toLocaleDateString('pt-BR');
+    } catch (e) {
+        return 'Erro data';
+    }
+}
+
+function formatTime(dateString) {
+     try {
+        const date = new Date(dateString);
+        // Check if date is valid
+        if (isNaN(date.getTime())) return 'Hora inválida';
+        return date.toLocaleTimeString('pt-BR');
+    } catch (e) {
+        return 'Erro hora';
+    }
+}
+
+// Chama a função quando o DOM está pronto
+document.addEventListener('DOMContentLoaded', buscarDashboard);
+    </script>
+</body>
+
+</html>

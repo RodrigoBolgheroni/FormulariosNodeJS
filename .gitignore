@@ -1,2 +1,8 @@
-# .gitignore
+.gitignore
 .env
+- Fazer Validações.txt
+.vscode
+node_modules
+.gitattributes
+package-lock.json
+package.json

@@ -125,7 +125,7 @@ router.get('/editarCliente/:idCliente', connectToDatabase, async (req, res) => {
           <meta name="description" content="">
           <meta name="author" content="">
           <link rel="icon" type="image/png" sizes="16x16" href="../plugins/images/favicon.png">
-          <title>Ample Admin Template - The Ultimate Multipurpose admin template</title>
+          <title>Editar Cliente - Arker Data Admin</title>
           <link href="../bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
           <link href="../plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.css" rel="stylesheet">
           <link href="../plugins/bower_components/toast-master/css/jquery.toast.css" rel="stylesheet">
@@ -157,12 +157,13 @@ router.get('/editarCliente/:idCliente', connectToDatabase, async (req, res) => {
                   </div>
               </nav>
 
-              <div class="navbar-default sidebar" role="navigation">
+<div class="navbar-default sidebar" role="navigation">
             <div class="sidebar-nav slimscrollsidebar">
                 <div class="sidebar-head">
-                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu">Navigation</span></h3>
+                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu"></span></h3>
                 </div>
                 <ul class="nav" id="side-menu">
+                    <li><a href="/dash"><i class="mdi mdi-chart-bar"></i><span class="hide-menu"> Dashboard</span></a></li>
                     <li> <a class="waves-effect active"><i class="mdi mdi-table fa-fw"></i> <span class="hide-menu">Tabelas<span class="fa arrow"></span></span></a>
                         <ul class="nav nav-second-level">
                             <li><a href="/cliente"><i class="ti-user fa-fw"></i><span class="hide-menu">Cliente</span></a></li>
@@ -203,7 +204,7 @@ router.get('/editarCliente/:idCliente', connectToDatabase, async (req, res) => {
                                     <div class="form-group" style="display: flex;">
                                         <div style="margin-right: 30px;width: 50%;">
                                             <label for="cliente">Nome do Cliente *</label>
-                                            <input type="text" class="form-control" id="clienteNovo" value="${cliente.Cliente}" name="clienteNovo">
+                                            <input type="text" class="form-control" id="clienteNovo" value="${cliente.Cliente}" name="clienteNovo" required>
                                         </div>
                                         <div style="width: 50%;">
                                             <label for="ativo">Ativo *</label>
@@ -271,7 +272,7 @@ router.get('/editarCliente/:idCliente', connectToDatabase, async (req, res) => {
                       </div>
                   </div>
               </div>
-              <footer class="footer text-center"> 2017 &copy; Ample Admin brought to you by themedesigner.in </footer>
+              <footer class="footer text-center"> 2025 &copy; Arker  - arker.com.br  </footer>
           </div>
           <script src="../plugins/bower_components/jquery/dist/jquery.min.js"></script>
           <script src="../bootstrap/dist/js/bootstrap.min.js"></script>

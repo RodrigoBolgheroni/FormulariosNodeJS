@@ -8,7 +8,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="icon" type="image/png" sizes="16x16" href="/plugins/images/favicon.png">
-    <title>Ample Admin Template - The Ultimate Multipurpose admin template</title>
+    <title>Cadastro Arquivo - Arker Data Admin</title>
     <!-- Bootstrap Core CSS -->
     <link href="bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Menu CSS -->
@@ -91,9 +91,10 @@
         <div class="navbar-default sidebar" role="navigation">
             <div class="sidebar-nav slimscrollsidebar">
                 <div class="sidebar-head">
-                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu">Navigation</span></h3>
+                    <h3><span class="fa-fw open-close"><i class="ti-menu hidden-xs"></i><i class="ti-close visible-xs"></i></span> <span class="hide-menu"></span></h3>
                 </div>
                 <ul class="nav" id="side-menu">
+                    <li><a href="/dash"><i class="mdi mdi-chart-bar"></i><span class="hide-menu"> Dashboard</span></a></li>
                     <li> <a class="waves-effect active"><i class="mdi mdi-table fa-fw"></i> <span class="hide-menu">Tabelas<span class="fa arrow"></span></span></a>
                         <ul class="nav nav-second-level">
                             <li><a href="/cliente"><i class="ti-user fa-fw"></i><span class="hide-menu">Cliente</span></a></li>
@@ -172,9 +173,16 @@
                                     </div>
 
                                     <div class="form-group col-md-12">
-                                        <label for="header">Header *
-                                        </label>
-                                        <input type="text" class="form-control" id="header" name="Header" required>
+                                        <label for="header">Header *</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="header" name="Header" required>
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-success" type="button" id="btnCarregarHeaderExcel" title="Carregar cabeçalho de arquivo Excel">
+                                                    <i class="fa fa-file-excel-o"></i> Carregar do Excel
+                                                </button>
+                                            </span>
+                                        </div>
+                                        <input type="file" id="inputExcelHeader" accept=".xlsx, .xls" style="display: none;">
                                     </div>
 
                                     <div class="form-group col-md-6">
@@ -217,21 +225,21 @@
                                         <div class="col-md-12">
                                             <div class="row">
                                                 <div class="col-md-2">
-                                                    <h5>Nome Campo                                                    <i class="fas fa-info-circle info-icon"></i>
-                                                        <span class="tooltip-text">Teste.</span></h5>
-
+                                                    <h5>Nome Campo  </h5>                                               
                                                 </div>
                                                 <div class="col-md-2">
                                                     <h5>Tipo De Dado</h5>
                                                 </div>
                                                 <div class="col-md-2">
-                                                    <h5>Formato</h5>
+                                                    <h5>Formato                                                    <i class="fas fa-info-circle info-icon"></i>
+                                                        <span class="tooltip-text">Formato do campo Ex: 225,yyy-mm-dd</span></h5>
                                                 </div>
                                                 <div class="col-md-2">
                                                     <h5>Regra</h5>
                                                 </div>
                                                 <div class="col-md-2">
-                                                    <h5>Valor</h5>
+                                                    <h5>Valor<i class="fas fa-info-circle info-icon"></i>
+                                                        <span class="tooltip-text">Valores separado por virgula</span></h5>
                                                 </div>
                                                 <div class="col-md-1">
                                                     <h5>Obrigatório</h5>
@@ -251,7 +259,7 @@
 
             </div>
 
-            <footer class="footer text-center"> 2017 &copy; Ample Admin brought to you by themedesigner.in </footer>
+            <footer class="footer text-center"> 2025 &copy; Arker - arker.com.br </footer>
         </div>
     </div>
 
@@ -270,6 +278,7 @@
     <script src="js/custom.min.js"></script>
     <script src="/plugins/bower_components/toast-master/js/jquery.toast.js"></script>
     <script src="/plugins/bower_components/styleswitcher/jQuery.style.switcher.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         async function carregarRegras() {
             try {
@@ -492,7 +501,7 @@
         carregarDados('/extensoes', 'extensao', 'IdExtensaoArquivo', 'ExtensaoArquivo', 'Ativo');
     </script>
     <script>
-        document.getElementById('formArquivo').addEventListener('submit', function (e) {
+        document.getElementById('formArquivo').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const regras = [];
@@ -516,15 +525,20 @@
 
                 const campo = inputCampo.value;
                 const tipoDado = selectTipoDado.value;
-                const formato = inputFormato.value;
+                let formato = inputFormato.value;
                 const regra = selectRegra.value;
                 const valor = inputValor.value;
                 const obrigatorio = checkboxObrigatorio.checked ? 1 : 0;
                 const data = checkboxData.checked ? 1 : 0;
 
+                // Se formato for vazio, usa o valor do campo "valor"
+                if (!formato || formato.trim() === '') {
+                    formato = valor;
+                }
+
                 regras.push({
                     DescricaoCampo: campo,
-                    TipoDeDado: tipoDado,
+                    IdTipoDeDado: tipoDado,
                     Formato: formato,
                     IdRegra: regra,
                     Valor: valor,
@@ -537,6 +551,84 @@
             document.getElementById('regrasJson').value = regrasJson;
             console.log('Regras JSON:', regrasJson);
             this.submit();
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnCarregarHeader = document.getElementById('btnCarregarHeaderExcel');
+            const inputExcel = document.getElementById('inputExcelHeader');
+            const headerInput = document.getElementById('header');
+            const loadingScreen = document.getElementById('loadingScreen'); // Pega a tela de loading
+    
+            // 1. Quando o botão "Carregar do Excel" é clicado
+            btnCarregarHeader.addEventListener('click', function() {
+                inputExcel.click(); // Simula um clique no input de arquivo oculto
+            });
+    
+            // 2. Quando um arquivo é selecionado no input oculto
+            inputExcel.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (!file) {
+                    return; // Nenhum arquivo selecionado
+                }
+    
+                loadingScreen.style.display = 'flex'; // Mostra o loading
+    
+                const reader = new FileReader();
+    
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        // Lê o arquivo Excel usando SheetJS
+                        const workbook = XLSX.read(data, { type: 'array',sheetRows: 1 });
+    
+                        // Pega o nome da primeira planilha
+                        const firstSheetName = workbook.SheetNames[0];
+                        if (!firstSheetName) {
+                            throw new Error("O arquivo Excel não contém planilhas.");
+                        }
+                        const worksheet = workbook.Sheets[firstSheetName];
+    
+                        // Converte a planilha para um array de arrays (header: 1 pega a primeira linha como array)
+                        // limit: 1 garante que apenas a primeira linha seja lida (otimização)
+                        const sheetData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '', limit: 1 });
+    
+                        if (sheetData && sheetData.length > 0) {
+                            const headerRow = sheetData[0];
+                            // Filtra valores vazios ou nulos que podem vir do Excel
+                            const cleanedHeader = headerRow.filter(cell => cell !== null && cell !== undefined && cell.toString().trim() !== '');
+                            // Junta os nomes das colunas com vírgula
+                            headerInput.value = cleanedHeader.join(',');
+    
+                            // **Importante:** Chamar a função para gerar os inputs de regra novamente
+                            // pois o header mudou.
+                            gerarInputsRegra(); // Chama a função que você já tem
+    
+                        } else {
+                            Swal.fire('Atenção', 'A primeira linha da planilha está vazia ou não foi possível lê-la.', 'warning');
+                            headerInput.value = ''; // Limpa o campo header
+                        }
+                    } catch (error) {
+                        console.error("Erro ao processar o arquivo Excel:", error);
+                        Swal.fire('Erro', `Não foi possível ler o arquivo Excel. Verifique se o formato é válido.\nDetalhes: ${error.message}`, 'error');
+                        headerInput.value = ''; // Limpa em caso de erro
+                    } finally {
+                         loadingScreen.style.display = 'none'; // Esconde o loading
+                         // Limpa o valor do input de arquivo para permitir selecionar o mesmo arquivo novamente
+                         inputExcel.value = null;
+                    }
+                };
+    
+                reader.onerror = function(e) {
+                     loadingScreen.style.display = 'none'; // Esconde o loading
+                     console.error("Erro ao ler o arquivo:", e);
+                     Swal.fire('Erro', 'Ocorreu um erro ao tentar ler o arquivo selecionado.', 'error');
+                     inputExcel.value = null;
+                };
+    
+                // Lê o arquivo como ArrayBuffer (necessário para SheetJS)
+                reader.readAsArrayBuffer(file);
+            });
         });
     </script>
 </body>
