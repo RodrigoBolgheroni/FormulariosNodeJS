@@ -38,7 +38,7 @@ const closeConnection = async (req, res) => { // Modificado para aceitar req, re
   }
 };
 
-// --- Rota GET /arquivos (sem alterações) ---
+// --- Rota GET /arquivos ---
 router.get('/arquivos', connectToDatabase, async (req, res) => {
   try {
     const request = new sql.Request(req.db); // Usa a conexão do request
@@ -72,7 +72,7 @@ router.get('/arquivos', connectToDatabase, async (req, res) => {
   }
 });
 
-// --- Rota PATCH /desativarArquivo/:idArquivo (sem alterações na lógica principal) ---
+// --- Rota PATCH /desativarArquivo/:idArquivo ---
 router.patch('/desativarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
   const { idArquivo } = req.params;
   const transaction = new sql.Transaction(req.db); // Usa a conexão do request
@@ -112,7 +112,7 @@ router.patch('/desativarArquivo/:idArquivo', connectToDatabase, async (req, res)
 });
 
 
-// --- Rota GET /editarArquivo/:idArquivo (HTML e JS Atualizados) ---
+// --- Rota GET /editarArquivo/:idArquivo  ---
 router.get('/editarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
   const { idArquivo } = req.params;
 
@@ -614,7 +614,7 @@ router.get('/editarArquivo/:idArquivo', connectToDatabase, async (req, res) => {
   }
 });
 
-// --- Rota POST /editarArquivo (Lógica Atualizada) ---
+// --- Rota POST /editarArquivo ---
 router.post('/editarArquivo', connectToDatabase, async (req, res) => {
   const {
     IdCliente_TipoArquivo, IdCliente, IdTipoArquivo, IdExtensaoArquivo,
@@ -641,11 +641,10 @@ router.post('/editarArquivo', connectToDatabase, async (req, res) => {
     await transaction.begin();
     console.log("Transação iniciada para edição.");
 
-    // 1. Buscar o mapeamento de Tipos de Dados (Nome para ID) - Não necessário se o front envia ID
-    // Assumindo que o front já envia IdTipoDeDados (INT) como coletado no JS atualizado.
+
 
     // 2. Determinar NomeCampoData a partir das regras recebidas
-    const regraData = regras.find(r => r.Data === 1); // Procura pela flag Data: 1
+    const regraData = regras.find(r => r.Data === 1); 
     const nomeCampoData = regraData ? regraData.DescricaoCampo : null;
     console.log('NomeCampoData determinado:', nomeCampoData);
 
@@ -655,10 +654,10 @@ router.post('/editarArquivo', connectToDatabase, async (req, res) => {
     requestArquivo.input('IdTipoArquivo', sql.Int, IdTipoArquivo);
     requestArquivo.input('IdExtensaoArquivo', sql.Int, IdExtensaoArquivo);
     requestArquivo.input('Encoding', sql.NVarChar, Encoding);
-    requestArquivo.input('IsHeader', sql.Int, IsHeader); // Usar Bit para booleano/int 0/1
+    requestArquivo.input('IsHeader', sql.Int, IsHeader); 
     requestArquivo.input('Header', sql.NVarChar, Header);
     requestArquivo.input('Chave', sql.NVarChar, Chave);
-    requestArquivo.input('Ativo', sql.Int, Ativo); // Usar Bit
+    requestArquivo.input('Ativo', sql.Int, Ativo); 
     requestArquivo.input('NomeCampoData', sql.NVarChar, nomeCampoData); // Atualiza o campo data
     requestArquivo.input('IdCliente_TipoArquivo', sql.Int, IdCliente_TipoArquivo); // WHERE clause
 
@@ -698,17 +697,17 @@ router.post('/editarArquivo', connectToDatabase, async (req, res) => {
       // Validação básica dos dados da regra
       if (IdTipoDeDado == null || IdRegra == null || DescricaoCampo == null || Obrigatorio == null) {
            console.warn('Regra inválida ou incompleta sendo pulada:', regra);
-           continue; // Pula esta regra se dados essenciais estiverem faltando
+           continue; 
       }
 
 
       const requestInsertRegra = new sql.Request(transaction);
       requestInsertRegra.input('IdCliente_TipoArquivo', sql.Int, IdCliente_TipoArquivo);
       requestInsertRegra.input('IdRegra', sql.Int, IdRegra);
-      requestInsertRegra.input('IdTipoDeDado', sql.Int, IdTipoDeDado); // Já deve ser INT vindo do front
-      requestInsertRegra.input('Formato', sql.VarChar, Formato || null); // Permite nulo se vazio
+      requestInsertRegra.input('IdTipoDeDado', sql.Int, IdTipoDeDado); 
+      requestInsertRegra.input('Formato', sql.VarChar, Formato || null); 
       requestInsertRegra.input('DescricaoCampo', sql.NVarChar, DescricaoCampo);
-      requestInsertRegra.input('Obrigatorio', sql.Bit, Obrigatorio); // Bit
+      requestInsertRegra.input('Obrigatorio', sql.Bit, Obrigatorio); 
 
       const insertRegraQuery = `
         INSERT INTO tblcliente_tipoarquivo_regra
@@ -735,15 +734,15 @@ router.post('/editarArquivo', connectToDatabase, async (req, res) => {
     } else {
         console.log("Erro detectado, mas transação não está ativa para rollback.");
     }
-    // Envia uma resposta de erro mais detalhada (opcional, cuidado em produção)
+    // Envia uma resposta de erro mais detalhada
     res.status(500).send(`Erro ao atualizar arquivo: ${err.message}`);
   } finally {
-    await closeConnection(req, res); // Passa req, res
+    await closeConnection(req, res);
   }
 });
 
 
-// --- Rota POST /cadastroarquivo (sem alterações, apenas para referência) ---
+// --- Rota POST /cadastroarquivo ---
 router.post('/cadastroarquivo', connectToDatabase, async (req, res) => {
   const { IdCliente, IdTipoArquivo, IdExtensaoArquivo, Encoding, IsHeader, Header, Chave, Ativo, regrasJson } = req.body;
   const transaction = new sql.Transaction(req.db); // Usa a conexão do request
@@ -757,7 +756,7 @@ router.post('/cadastroarquivo', connectToDatabase, async (req, res) => {
     const regras = JSON.parse(regrasJson);
     console.log('Regras parseadas:', regras);
 
-    const regraData = regras.find(regra => regra.Data === 1); // Procura pela flag Data: 1
+    const regraData = regras.find(regra => regra.Data === 1); 
     const nomeCampoData = regraData ? regraData.DescricaoCampo : null;
     console.log('Nome do campo data:', nomeCampoData);
 
@@ -788,14 +787,14 @@ router.post('/cadastroarquivo', connectToDatabase, async (req, res) => {
       OUTPUT INSERTED.IdCliente_TipoArquivo -- Retorna o ID gerado
       VALUES (@IdCliente, @IdTipoArquivo, @IdExtensaoArquivo, @Encoding, @IsHeader, @Header, @Chave, @Ativo, @NomeCampoData, GETDATE());
     `;
-    requestInsertArquivo.input('IdCliente', sql.Int, IdCliente); // Já definido acima
-    requestInsertArquivo.input('IdTipoArquivo', sql.Int, IdTipoArquivo); // Já definido acima
+    requestInsertArquivo.input('IdCliente', sql.Int, IdCliente); 
+    requestInsertArquivo.input('IdTipoArquivo', sql.Int, IdTipoArquivo); 
     requestInsertArquivo.input('IdExtensaoArquivo', sql.Int, IdExtensaoArquivo);
     requestInsertArquivo.input('Encoding', sql.NVarChar, Encoding);
-    requestInsertArquivo.input('IsHeader', sql.Int, IsHeader); // Bit
+    requestInsertArquivo.input('IsHeader', sql.Int, IsHeader); 
     requestInsertArquivo.input('Header', sql.NVarChar, Header);
     requestInsertArquivo.input('Chave', sql.NVarChar, Chave);
-    requestInsertArquivo.input('Ativo', sql.Int, Ativo); // Bit
+    requestInsertArquivo.input('Ativo', sql.Int, Ativo); 
     requestInsertArquivo.input('NomeCampoData', sql.NVarChar, nomeCampoData);
 
     const result = await requestInsertArquivo.query(insertArquivoQuery);
@@ -803,13 +802,12 @@ router.post('/cadastroarquivo', connectToDatabase, async (req, res) => {
     console.log('Arquivo inserido com sucesso. ID gerado:', IdCliente_TipoArquivo);
 
     // Insere as regras na tabela `tblcliente_tipoarquivo_regra`
-    // Insere as regras na tabela `tblcliente_tipoarquivo_regra`
     for (const regra of regras) {
-      const { IdRegra, IdTipoDeDado, Formato, DescricaoCampo, Obrigatorio } = regra; // <--- Extraction
+      const { IdRegra, IdTipoDeDado, Formato, DescricaoCampo, Obrigatorio } = regra;
 
-      console.log('Processando regra para cadastro:', regra); // <--- Good log
+      console.log('Processando regra para cadastro:', regra); 
 
-      const regraRequest = new sql.Request(transaction); // Nova request dentro do loop
+      const regraRequest = new sql.Request(transaction); 
       const insertRegraQuery = `
         INSERT INTO tblcliente_tipoarquivo_regra
         (IdCliente_TipoArquivo, IdRegra, IdTipoDeDado, Formato, DescricaoCampo, Obrigatorio, DataInsercao)
@@ -818,12 +816,12 @@ router.post('/cadastroarquivo', connectToDatabase, async (req, res) => {
       regraRequest.input('IdCliente_TipoArquivo', sql.Int, IdCliente_TipoArquivo);
       regraRequest.input('IdRegra', sql.Int, IdRegra);
       regraRequest.input('IdTipoDeDado', sql.Int, IdTipoDeDado);
-      regraRequest.input('Formato', sql.VarChar, Formato || null); // Permite nulo
+      regraRequest.input('Formato', sql.VarChar, Formato || null); 
       regraRequest.input('DescricaoCampo', sql.NVarChar, DescricaoCampo);
-      regraRequest.input('Obrigatorio', sql.Bit, Obrigatorio); // Bit
+      regraRequest.input('Obrigatorio', sql.Bit, Obrigatorio); 
 
       await regraRequest.query(insertRegraQuery);
-      console.log('Regra inserida com sucesso no cadastro:', regra); // <--- Good log
+      console.log('Regra inserida com sucesso no cadastro:', regra); 
     }
 
 
@@ -848,7 +846,7 @@ router.post('/cadastroarquivo', connectToDatabase, async (req, res) => {
 });
 
 
-// --- Rota GET /tipos (sem alterações) ---
+// --- Rota GET /tipos ---
 router.get('/tipos', connectToDatabase, async (req, res) => {
   try {
     const request = new sql.Request(req.db); // Usa a conexão do request
